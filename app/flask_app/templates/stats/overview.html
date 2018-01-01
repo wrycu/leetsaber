@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% from '_formhelper.html' import render_game_list, render_overview_stats, render_game_list, render_game_stats, render_personal_stats %}
+
+{% block body %}
+<div class="ui two column internally celled grid">
+    <div class="row centered">
+        {{ render_overview_stats(stats['games'], stats['time'], stats['users']) }}
+    </div>
+    <div class="row">
+        <div class="center aligned column">
+            {{ stats['most_shared'] }} plays the most shared games!
+        </div>
+        <div class="center aligned column">
+            {{ stats['least_shared'] }} plays the least shared games!
+        </div>
+    </div>
+    <div class="row">
+        {{ render_game_list(current_games) }}
+    </div>
+    <div class="row">
+        <div class="column">
+            <div id="top_games_by_play_time">
+                Bar graph of top game by hours player
+            </div>
+        </div>
+        <div class="column">
+            <div id="top_games_by_user_count">
+                Bar graph of top game by players
+            </div>
+        </div>
+    </div>
+    <div class="row centered">
+        <div id="">
+            Bar graph of hourly activity
+        </div>
+    </div>
+    <div class="row centered">
+        <div class="column">
+            <div id="">
+                Bar graph of shared game count
+            </div>
+        </div>
+        <div class="column">
+            <div id="">
+                Scatter plot of game time per user
+            </div>
+        </div>
+    </div>
+    <div class="row centered">
+
+        <div class="column">
+            (user section)
+        (user selection)
+            <div id="">
+                <div class="row centered">
+        {{ render_personal_stats(20, 3, 4) }}
+    </div>
+                50% games shared by at least 2 other members
+                Bar graph of top game by hours player (% gametime?)
+            </div>
+        </div>
+        <div class="column">
+            <div id="">
+                Scatter plot of time per game
+            </div>
+        </div>
+    </div>
+<div class="row centered">
+    (game section)
+        {{ render_game_stats(20, 34) }}
+    </div>
+    <div class="row">
+        <div class="center aligned column">
+            played by 75% of members
+        </div>
+        <div class="center aligned column">
+            50 minutes average session length
+        </div>
+    </div>
+</div>
+{% endblock %}

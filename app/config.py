@@ -16,7 +16,9 @@ conf = {
         'pass': config.get('mysql', 'pass'),
         'host': config.get('mysql', 'host'),
         'port': config.get('mysql', 'port'),
-        'db': config.get('mysql', 'db'),
+        'stats': {
+            'db': config.get('mysql', 'db'),
+        },
     },
     'discord': {
         'email': config.get('discord', 'email'),
@@ -29,10 +31,10 @@ engine = create_engine(
         password=conf['mysql']['pass'],
         host=conf['mysql']['host'],
         port=conf['mysql']['port'],
-        db=conf['mysql']['db'],
+        db=conf['mysql']['stats']['db'],
     )
 )
-DB_META = MetaData(bind=engine, reflect=True)
-USER_TABLE = DB_META.tables['users']
-GAMES_TABLE = DB_META.tables['games']
-STATS_TABLE = DB_META.tables['statistics']
+STATS_DB_META = MetaData(bind=engine, reflect=True)
+DISCORD_USER_TABLE = STATS_DB_META.tables['users']
+STATS_GAMES_TABLE = STATS_DB_META.tables['games']
+STATS_STATS_TABLE = STATS_DB_META.tables['statistics']

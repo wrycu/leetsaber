@@ -1,0 +1,37 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Discord Stat Tracking 2.0</title>
+</head>
+<body>
+<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="{{ url_for('static', filename='semantic.min.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='semantic.min.css') }}">
+
+{% include 'navbar.html' %}
+
+<div class="ui bottom attached tab segment active" data-tab="overview">
+    {% include 'overview.html' %}
+</div>
+<div class="ui bottom attached tab segment" data-tab="by_user">
+    {% include 'by_user.html' %}
+</div>
+<div class="ui bottom attached tab segment" data-tab="by_game">
+    {% include 'by_game.html' %}
+</div>
+<div class="ui bottom attached tab segment" data-tab="by_time">
+    Go away.
+</div>
+
+<script>
+$(function () {
+    /* Navbar tabs */
+    $('.menu .item').tab();
+
+    /* Prepare tooltips */
+    $('[data-toggle="tooltip"]').popup();
+});
+</script>
+</body>
+</html>

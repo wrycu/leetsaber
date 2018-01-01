@@ -1,0 +1,103 @@
+{%- macro render_game_list(game_dict) %}
+    <div class="ui middle aligned selection divided list">
+    {% for game, players in game_dict.items() %}
+        <div class="item">
+            <div class="right floated content">
+                <div class="ui mini label" data-html="{{ render_players(players) }}" data-toggle="tooltip" data-variation="inverted">
+                     {{ players|length }} player(s)
+                </div>
+            </div>
+            <img class="ui avatar image" src="{{ url_for('static', filename="game_one.png") }}">
+            {# <img class="ui avatar image" src="{{ url_for('static', filename="players['link']") }}"> #}
+            <div class="content">
+                <div class="header">{{ game }}</div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endmacro -%}
+
+{%- macro render_players(player_list) %}
+    {% for player in player_list %}
+        {{ player }}<br>
+    {% endfor %}
+{% endmacro -%}
+
+{%- macro render_overview_stats(games, hours, members) %}
+    <div class="ui statistics">
+        <div class="grey statistic">
+            <div class="value">
+                {{ games }}
+            </div>
+            <div class="label">
+                Games
+            </div>
+        </div>
+        <div class="statistic">
+            <div class="value">
+                {{ hours }}
+            </div>
+            <div class="label">
+                Hours
+            </div>
+        </div>
+        <div class="grey statistic">
+            <div class="value">
+                {{ members }}
+            </div>
+            <div class="label">
+                Members
+            </div>
+        </div>
+    </div>
+{% endmacro -%}
+
+{% macro render_personal_stats(games, hours, length) %}
+    <div class="ui statistics">
+        <div class="grey statistic">
+            <div class="value">
+                {{ games }}
+            </div>
+            <div class="label">
+                Games
+            </div>
+        </div>
+        <div class="statistic">
+            <div class="value">
+                {{ hours }}
+            </div>
+            <div class="label">
+                Hours
+            </div>
+        </div>
+        <div class="grey statistic">
+            <div class="value">
+                {{ length }}
+            </div>
+            <div class="label">
+                Days tracked
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro render_game_stats(players, hours) %}
+    <div class="ui statistics">
+        <div class="statistic">
+            <div class="value">
+                {{ hours }}
+            </div>
+            <div class="label">
+                Hours
+            </div>
+        </div>
+        <div class="statistic">
+            <div class="value">
+                {{ players }}
+            </div>
+            <div class="label">
+                Players
+            </div>
+        </div>
+    </div>
+{% endmacro %}
