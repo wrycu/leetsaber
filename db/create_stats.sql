@@ -18,7 +18,7 @@ CREATE TABLE `games` (
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `FK_games_users_idx` (`firstUser`),
   CONSTRAINT `FK_games_users` FOREIGN KEY (`firstUser`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `statistics` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -32,4 +32,4 @@ CREATE TABLE `statistics` (
   KEY `FK_statistics_games_idx` (`gameId`),
   CONSTRAINT `FK_statistics_games` FOREIGN KEY (`gameId`) REFERENCES `games` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_statistics_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
