@@ -33,7 +33,7 @@
                 Games
             </div>
         </div>
-        <div class="statistic">
+        <div class="blue statistic">
             <div class="value">
                 {{ hours }}
             </div>
@@ -51,53 +51,3 @@
         </div>
     </div>
 {% endmacro -%}
-
-{% macro render_personal_stats(games, hours, length) %}
-    <div class="ui statistics">
-        <div class="grey statistic">
-            <div class="value">
-                {{ games }}
-            </div>
-            <div class="label">
-                Games
-            </div>
-        </div>
-        <div class="statistic">
-            <div class="value">
-                {{ hours }}
-            </div>
-            <div class="label">
-                Hours
-            </div>
-        </div>
-        <div class="grey statistic">
-            <div class="value">
-                {{ length }}
-            </div>
-            <div class="label">
-                Days tracked
-            </div>
-        </div>
-    </div>
-{% endmacro %}
-
-{% macro render_game_stats(players, hours) %}
-    <div class="ui statistics">
-        <div class="statistic">
-            <div class="value">
-                {{ hours }}
-            </div>
-            <div class="label">
-                Hours
-            </div>
-        </div>
-        <div class="statistic">
-            <div class="value">
-                {{ players }}
-            </div>
-            <div class="label">
-                Players
-            </div>
-        </div>
-    </div>
-{% endmacro %}

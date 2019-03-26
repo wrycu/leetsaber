@@ -1,81 +1,457 @@
 {% extends 'base.html' %}
-{% from '_formhelper.html' import render_game_list, render_overview_stats, render_game_list, render_game_stats, render_personal_stats %}
+{% from '_formhelper.html' import render_game_list, render_overview_stats, render_game_list, render_game_stats %}
 
 {% block body %}
-<div class="ui two column internally celled grid">
-    <div class="row centered">
-        {{ render_overview_stats(stats['games'], stats['time'], stats['users']) }}
-    </div>
-    <div class="row">
-        <div class="center aligned column">
-            {{ stats['most_shared'] }} plays the most shared games!
+    <div class="ui two column internally celled grid">
+        <div class="row centered">
+            {{ render_overview_stats(stats['games'], stats['time'], stats['users']) }}
         </div>
-        <div class="center aligned column">
-            {{ stats['least_shared'] }} plays the least shared games!
+        <div class="row">
+            {{ render_game_list(current_games) }}
         </div>
-    </div>
-    <div class="row">
-        {{ render_game_list(current_games) }}
-    </div>
-    <div class="row">
-        <div class="column">
-            <div id="top_games_by_play_time">
-                Bar graph of top game by hours player
+        <div class="row">
+            <div class="column">
+                <div id="top_games_by_play_time">
+                    Bar graph of top game by hours player
+                </div>
+            </div>
+            <div class="column">
+                <div id="top_games_by_user_count">
+                    Bar graph of top game by players
+                </div>
             </div>
         </div>
-        <div class="column">
-            <div id="top_games_by_user_count">
-                Bar graph of top game by players
+        <div class="row">
+            <div class="sixteen wide column">
+                <div id="top_active_time_of_day">
+                    Bar graph of hourly activity
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row centered">
-        <div id="">
-            Bar graph of hourly activity
-        </div>
-    </div>
-    <div class="row centered">
-        <div class="column">
-            <div id="">
-                Bar graph of shared game count
+        <div class="row centered">
+            <div class="ui search user">
+                <div class="ui icon input" id="user_typeahead">
+                    <input class="prompt" type="text" placeholder="Discord user">
+                    <i class="search icon"></i>
+                </div>
+                <div class="results"></div>
             </div>
         </div>
-        <div class="column">
-            <div id="">
-                Scatter plot of game time per user
-            </div>
-        </div>
-    </div>
-    <div class="row centered">
-
-        <div class="column">
-            (user section)
-        (user selection)
+        <div class="row centered">
             <div id="">
                 <div class="row centered">
-        {{ render_personal_stats(20, 3, 4) }}
-    </div>
-                50% games shared by at least 2 other members
-                Bar graph of top game by hours player (% gametime?)
+                    <div class="ui statistics">
+                        <div class="grey statistic tooltip" data-content="Unique games played by this user"
+                             data-variation="inverted">
+                            <div class="value" id="user_games">
+                                {{ stats['user_overview']['games'] }}
+                            </div>
+                            <div class="label">
+                                Games
+                            </div>
+                        </div>
+                        <div class="statistic tooltip" data-content="Total hours played" data-variation="inverted">
+                            <div class="value" id="user_hours">
+                                {{ stats['user_overview']['hours'] }}
+                            </div>
+                            <div class="label">
+                                Hours
+                            </div>
+                        </div>
+                        <div class="grey statistic tooltip" data-content="Days since the user was first tracked"
+                             data-variation="inverted">
+                            <div class="value" id="user_days">
+                                {{ stats['user_overview']['days'] }}
+                            </div>
+                            <div class="label">
+                                Days tracked
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="column">
-            <div id="">
-                Scatter plot of time per game
+        <div class="row">
+            <div class="sixteen wide column">
+                <div id="user_heatmap"></div>
+            </div>
+        </div>
+        <div class="row centered">
+            <div class="ui search game tooltip" data-content="Select a game to view stats for"
+                 data-variation="inverted">
+                <div class="ui icon input" id="game_typeahead">
+                    <input class="prompt" type="text" placeholder="Discord game">
+                    <i class="search icon"></i>
+                </div>
+                <div class="results"></div>
+            </div>
+        </div>
+        <div class="row centered">
+            <div class="ui statistics">
+                <div class="statistic tooltip" data-content="Percent of players who play this game"
+                     data-variation="inverted">
+                    <div class="value" id="percent_players">
+                        {{ stats['game_overview']['percent_players'] }}
+                    </div>
+                    <div class="label">
+                        % players
+                    </div>
+                </div>
+                <div class="statistic tooltip" data-content="Collective hours played" data-variation="inverted">
+                    <div class="value" id="game_hours">
+                        {{ stats['game_overview']['hours'] }}
+                    </div>
+                    <div class="label">
+                        Hours
+                    </div>
+                </div>
+                <div class="statistic tooltip" data-content="Total players who play this game"
+                     data-variation="inverted">
+                    <div class="value" id="game_players">
+                        {{ stats['game_overview']['players'] }}
+                    </div>
+                    <div class="label">
+                        Players
+                    </div>
+                </div>
+                <div class="statistic tooltip" data-content="Average length of session, in hours"
+                     data-variation="inverted">
+                    <div class="value" id="avg_game_session">
+                        {{ stats['game_overview']['avg_session'] }}
+                    </div>
+                    <div class="label">
+                        Avg Session
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="sixteen wide column">
+                <div id="game_heatmap"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="sixteen wide column">
+                <div id="game_user_count"></div>
             </div>
         </div>
     </div>
-<div class="row centered">
-    (game section)
-        {{ render_game_stats(20, 34) }}
-    </div>
-    <div class="row">
-        <div class="center aligned column">
-            played by 75% of members
-        </div>
-        <div class="center aligned column">
-            50 minutes average session length
-        </div>
-    </div>
-</div>
+    <script>
+        $(function () {
+            Highcharts.chart('game_heatmap', {
+                series: [{
+                    type: 'wordcloud',
+                    data: {{ stats['game_heatmap']|safe }},
+                    name: 'Hours played'
+                }],
+                title: {
+                    text: 'Word cloud of players of all games'
+                },
+                plotOptions: {
+                    wordcloud: {
+                        maxFontSize: 8,
+                        minFontSize: 2,
+                    }
+                },
+            });
+            Highcharts.chart('user_heatmap', {
+                series: [{
+                    type: 'wordcloud',
+                    data: {{ stats['user_heatmap']|safe }},
+                    name: 'Occurrences'
+                }],
+                title: {
+                    text: 'Word cloud of games played by all users'
+                },
+                plotOptions: {
+                    wordcloud: {
+                        maxFontSize: 8,
+                        minFontSize: 2,
+                    }
+                },
+            });
+            $('#game_user_count').highcharts({
+                title: {
+                    text: 'User Count/Game - 4',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: 'over time',
+                    x: -20
+                },
+                xAxis: {
+                    categories: {{ stats['game_count']['times']|tojson|safe }}
+                },
+                yAxis: {
+                    title: {
+                        text: '# of players'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                tooltip: {
+                    valueSuffix: ' players',
+                    shared: true
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                series: {{ stats['game_count']['games']|tojson|safe }}
+            });
+
+            $.getJSON('{{ url_for('stats.top_games_by_play_time') }}', function (data) {
+                console.log(data);
+                // Populate series
+                $('#top_games_by_play_time').highcharts({
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Top 5 played games - 1'
+                    },
+                    subtitle: {
+                        text: 'by combined gametime'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Game'
+                        },
+                        categories: [
+                            'Game',
+                        ]
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Time in game'
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y:.1f}</b> combined hours'
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: data
+                });
+            });
+
+            $.getJSON('{{ url_for('stats.top_games_by_user_count') }}', function (data) {
+                console.log(data);
+                // Populate series
+                $('#top_games_by_user_count').highcharts({
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Top 5 played games - 2'
+                    },
+                    subtitle: {
+                        text: 'by unique players'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Game'
+                        },
+                        categories: [
+                            'Game',
+                        ]
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Users who have played game'
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y}</b> total players'
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: data
+                });
+            });
+            $.getJSON('{{ url_for('stats.top_active_time_of_day') }}', function (data) {
+                console.log(data);
+                // Populate series
+                $('#top_active_time_of_day').highcharts({
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Hourly Activity - 3'
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'hour'
+                        },
+                        categories: [
+                            'Activity',
+                        ]
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Average Active users'
+                        }
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y:.1f}</b> users on average'
+                    },
+                    plotOptions: {
+                        column: {
+                            borderWidth: 0,
+                            tooltip: {
+                                valueSuffix: ' average users',
+                            },
+                        }
+                    },
+                    series: data
+                });
+            });
+
+            /* Typeahead for the users */
+            $('.ui.search.user').search({
+                apiSettings: {
+                    url: '{{ url_for('stats.typeahead') }}?user={query}',
+                },
+                minCharacters: 3,
+                onSelect: function (result, response) {
+                    console.log('sselect');
+                    console.log(result);
+                    console.log(response);
+                    // title, value, id
+                    update_user_stats(result['value']);
+                    user_heatmap(result['value'], result['title']);
+                }
+            });
+
+            function update_user_stats(user_id) {
+                $.getJSON('{{ url_for('stats.user_stats') }}' + '/' + user_id, function (data) {
+                    $('#user_games').text(data['games']);
+                    $('#user_hours').text(data['hours']);
+                    $('#user_days').text(data['days']);
+                });
+            }
+
+            function user_heatmap(user_id, user_name) {
+                $.getJSON('{{ url_for('stats.user_heatmap') }}' + '/' + user_id, function (words) {
+                    Highcharts.chart('user_heatmap', {
+                        series: [{
+                            type: 'wordcloud',
+                            data: words,
+                            name: 'Occurrences'
+                        }],
+                        title: {
+                            text: 'Wordcloud of games played by ' + user_name
+                        },
+                        plotOptions: {
+                            wordcloud: {
+                                maxFontSize: 8,
+                                minFontSize: 2,
+                            }
+                        },
+                    });
+                });
+            }
+
+            /* Typeahead for games */
+            $('.ui.search.game').search({
+                apiSettings: {
+                    url: '{{ url_for('stats.typeahead') }}?game={query}',
+                },
+                minCharacters: 3,
+                onSelect: function (result, response) {
+                    console.log('sselect');
+                    console.log(result);
+                    console.log(response);
+                    // title, value, id
+                    update_game_stats(result['value']);
+                    game_heatmap(result['value'], result['title']);
+                }
+            });
+
+            function update_game_stats(game_id) {
+                $.getJSON('{{ url_for('stats.game_stats') }}' + '/' + game_id, function (data) {
+                    $('#game_hours').text(data['hours']);
+                    $('#game_players').text(data['players']);
+                    $('#percent_players').text(data['percent_players']);
+                    $('#avg_game_session').text(data['avg_session']);
+                });
+            }
+
+            function game_heatmap(game_id, game_name) {
+                $.getJSON('{{ url_for('stats.game_heatmap') }}' + '/' + game_id, function (words) {
+                    Highcharts.chart('game_heatmap', {
+                        series: [{
+                            type: 'wordcloud',
+                            data: words,
+                            name: 'Hours played'
+                        }],
+                        title: {
+                            text: 'Wordcloud of players of ' + game_name
+                        },
+                        plotOptions: {
+                            wordcloud: {
+                                maxFontSize: 8,
+                                minFontSize: 2,
+                            }
+                        },
+                    });
+                });
+
+                $.getJSON('{{ url_for('stats.game_user_count_over_time') }}' + '/' + game_id, function (data) {
+                    console.log(data);
+                    // Populate series
+                    $('#game_user_count').highcharts({
+                        title: {
+                            text: 'User Count/Game - 4',
+                            x: -20 //center
+                        },
+                        subtitle: {
+                            text: 'over time',
+                            x: -20
+                        },
+                        xAxis: {
+                            categories: data['times']
+                        },
+                        yAxis: {
+                            title: {
+                                text: '# of players'
+                            },
+                            plotLines: [{
+                                value: 0,
+                                width: 1,
+                                color: '#808080'
+                            }]
+                        },
+                        tooltip: {
+                            valueSuffix: ' players',
+                            shared: true
+                        },
+                        legend: {
+                            layout: 'vertical',
+                            align: 'right',
+                            verticalAlign: 'middle',
+                            borderWidth: 0
+                        },
+                        series: data['games'],
+                        chart: {
+                            zoomType: 'x'
+                        },
+                    });
+                });
+            }
+        })
+    </script>
 {% endblock %}

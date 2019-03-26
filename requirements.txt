@@ -2,3 +2,5 @@ flask
 sqlalchemy
 pymysql
 orator
+beautifulsoup4
+jinja2
