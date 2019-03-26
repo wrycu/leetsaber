@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="ui grid">
+    <div class="centered row">
+        <form method="post" id="myform">
+            <div class="field">
+                <div class="ui action input">
+                    <label for="controls" class="ui icon button">
+                        <i class="attach icon"></i>
+                        Upload
+                        <input type="file" id="controls" name="controls" style="display: none">
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div id="body"></div>
+    </div>
+</div>
+
+<div id="error" class="ui modal">
+    <div class="header">Error</div>
+    <div id="error_content" class="content"></div>
+</div>
+
+<script>
+$(document).ready(function () {
+    $("#controls").change(function(){
+        var formData = new FormData($("#myform")[0]);
+		$.ajax({
+            url: "{{ url_for('dcs.upload') }}",
+            type: 'POST',
+            data: formData,
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,  // tell jQuery not to set contentType
+            success: function(data) {
+                $("#body").html(data);
+                while( $('.fitin div').height() > $('.fitin').height() ) {
+                    $('.fitin div').css('font-size', (parseInt($('.fitin div').css('font-size')) - 1) + "px" );
+                }
+            },
+            error: function(xhr, text, error) {
+                $("#error_content").text(xhr.responseText);
+                $('.ui.modal').modal('show');
+            },
+		});
+    });
+});
+</script>
+{% endblock %}
