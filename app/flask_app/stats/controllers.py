@@ -40,7 +40,9 @@ def overview_data():
         config.STATS_STATS_TABLE.c.startTime,
         config.STATS_STATS_TABLE.c.endTime,
     ]).group_by(
-        config.STATS_STATS_TABLE.c.gameId
+        config.STATS_STATS_TABLE.c.gameId,
+        config.STATS_STATS_TABLE.c.startTime,
+        config.STATS_STATS_TABLE.c.endTime,
     ).execute().fetchall()
     for result in results:
         if result.endTime:
