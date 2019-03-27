@@ -242,7 +242,8 @@ def user_stats(user_id=0):
             where_clause,
         )
     ).group_by(
-        config.STATS_STATS_TABLE.c.gameId
+        config.STATS_STATS_TABLE.c.gameId,
+        config.STATS_STATS_TABLE.c.startTime
     ).order_by(
         asc(
             config.STATS_STATS_TABLE.c.startTime
