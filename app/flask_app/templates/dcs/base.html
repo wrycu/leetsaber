@@ -16,7 +16,14 @@
         </form>
     </div>
     <div class="row">
-        <div id="body"></div>
+        <div class="five wide column"></div>
+        <div class="three wide column">
+            <div id="stick"></div>
+        </div>
+        <div class="three wide column">
+            <div id="throttle"></div>
+        </div>
+        <div class="five wide column"></div>
     </div>
 </div>
 
@@ -36,10 +43,15 @@ $(document).ready(function () {
             processData: false,  // tell jQuery not to process the data
             contentType: false,  // tell jQuery not to set contentType
             success: function(data) {
-                $("#body").html(data);
-                while( $('.fitin div').height() > $('.fitin').height() ) {
-                    $('.fitin div').css('font-size', (parseInt($('.fitin div').css('font-size')) - 1) + "px" );
-                }
+                $("#stick").html(data.split('|')[0]);
+                $("#throttle").html(data.split('|')[1]);
+                $("#stick_save").on("click", function(){
+                    save_pic('stick');
+                });
+                $("#throttle_save").on("click", function(){
+                    save_pic('throttle');
+                });
+                return;
             },
             error: function(xhr, text, error) {
                 $("#error_content").text(xhr.responseText);
@@ -47,6 +59,13 @@ $(document).ready(function () {
             },
 		});
     });
+
+    function save_pic(controller) {
+        var link = document.createElement("a");
+        link.setAttribute("href", $('#' + controller + '_data').attr('src'));
+        link.setAttribute("download", controller + '.png');
+        link.click();
+    }
 });
 </script>
 {% endblock %}

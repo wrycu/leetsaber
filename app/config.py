@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, MetaData
 from configparser import ConfigParser
 import os
-#from misc.dcs import ControlMapper
+from misc.dcs import ControlMapper
 
 DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -9,7 +9,7 @@ CSRF_ENABLED = True
 # TODO: Move to a config file
 CSRF_SESSION_KEY = "TOP_SECRET"
 SECRET_KEY = "ANOTHER_SECRET"
-#MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 config = ConfigParser()
 config.read(os.path.join(BASE_DIR, os.pardir, 'config.ini'))
 conf = {
@@ -69,4 +69,4 @@ STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
 #A_TURN_LOG_TABLE = ARMADA_DB_META.tables['turn_log']
 #A_UPGRADE_TABLE = ARMADA_DB_META.tables['upgrades']
 #A_USER_TABLE = ARMADA_DB_META.tables['users']
-#CONTROL_MAPPER = ControlMapper()
+CONTROL_MAPPER = ControlMapper()

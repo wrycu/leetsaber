@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup as bs
-from jinja2 import Environment, FileSystemLoader
 from flask import render_template
+from PIL import Image, ImageDraw, ImageFont
+import os
+import io
+import base64
 
 
 class ControlMapper:
@@ -24,15 +27,64 @@ class ControlMapper:
         if not controller:
             raise Exception("Unknown controller: {}".format(title))
 
+        file_path = os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'img')
+        stick_image = Image.open(os.path.join(file_path, 'x52_stick.png'))
+        throttle_image = Image.open(os.path.join(file_path, 'x52_throttle.png'))
+        # initialise the drawing context with
+        # the image object as background
+        stick_draw = ImageDraw.Draw(stick_image)
+        throttle_draw = ImageDraw.Draw(throttle_image)
+        font = ImageFont.truetype(
+            os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'font', 'lucon.ttf'),
+            size=12,
+        )
+
         table = bs.find(soup, 'table')
         for row in table.find_all('tr'):
             columns = row.find_all('td')
-            control = columns[0].text.replace('"', '').strip()
-            if control in controller.control_mapping:
-                output[controller.control_mapping[control]] = columns[1].text.replace('"', '').strip()
-            elif control and control not in controller.ignore_mapping:
-                print("Found control not mapped to", controller.name, control)
-        return render_template('dcs/{}.html'.format(controller.name), **output)
+            control_a = columns[0].text.replace('"', '').strip()
+            for control in control_a.split('; '):
+                if control in controller.control_mapping:
+                    output[controller.control_mapping[control]] = columns[1].text.replace('"', '').strip()
+                    # starting position of the message
+                    try:
+                        (x, y, size, hotas) = controller.position_mapping[control]
+                    except:
+                        continue
+                    if hotas == 'stick':
+                        the_draw = stick_draw
+                    elif hotas == 'throttle':
+                        the_draw = throttle_draw
+                        print(control)
+                    else:
+                        print("unknown stick type")
+                        continue
+                    message = columns[1].text.replace('"', '').strip()
+                    color = 'rgb(0, 0, 0)'  # black color
+                    while len(message) > size:
+                        position = message[0:size].rfind(' ')
+                        the_draw.text((x, y), message[0:position], fill=color, font=font)
+                        y += 15
+                        the_draw.text((x, y), message[position+1:position+size], fill=color, font=font)
+                        message = message[position+size+1:]
+                        y += 15
+                    # draw the message on the background
+                    the_draw.text((x, y), message, fill=color, font=font)
+                elif control and control not in controller.ignore_mapping:
+                    print("Found control not mapped to", controller.name, control)
+
+        # save the edited image
+        stick_output = io.BytesIO()
+        throttle_output = io.BytesIO()
+        io.BytesIO(stick_image.save(stick_output, format='png', compress_level=9))
+        io.BytesIO(throttle_image.save(throttle_output, format='png', compress_level=9))
+
+        stick_output.seek(0)
+        return render_template(
+            'dcs/{}.html'.format(controller.name),
+            joystick=base64.b64encode(stick_output.getvalue()).decode('utf-8'),
+            throttle=base64.b64encode(throttle_output.getvalue()).decode('utf-8'),
+        )
 
 
 class X52:
@@ -41,32 +93,35 @@ class X52:
         Mapping of buttons to actual buttons
 
         Stick
-            Fire                JOY_BTN2        592,148         687,148
-            Fire A              JOY_BTN3        1381,486        1473,486
-            Fire B              JOY_BTN4        1379,636        1475,636
-            Fire C              JOY_BTN5        592,329         689,329
+            Fire                JOY_BTN2        530, 135        530, 205
+            Fire A              JOY_BTN3        1350, 114       1350, 183
+            Fire B              JOY_BTN4        1350, 295       1350, 364
+            Fire C              JOY_BTN5        530, 363        530, 433
             POV Hat 1           --------
-                Up              JOY_BTN_POV1_U  139,618         351,618
-                Down            JOY_BTN_POV1_D  139,687
-                Left            JOY_BTN_POV1_L  90,652
-                Right           JOY_BTN_POV1_R  190,652
+                Up              JOY_BTN_POV1_U  75, 355         333, 355
+                Down            JOY_BTN_POV1_D  75, 495         333, 495
+                Left            JOY_BTN_POV1_L  5, 423          263, 423
+                Right           JOY_BTN_POV1_R  140, 423        396, 423
             POV Hat 2           ---------
-                Up              JOY_BTN16       139,344         348,344
-                Down            JOY_BTN18       139,413
-                Left            JOY_BTN19       91,380
-                Right           JOY_BTN17       191,378
-            Trigger             JOY_BTN1        596,467
-            Second Trigger      JOY_BTN15       597,599
-            Toggle 1            JOY_BTN9        107,909
-            Toggle 2            JOY_BTN10       107,944
-            Toggle 3            JOY_BTN11       224,909
-            Toggle 4            JOY_BTN12
-            Toggle 5            JOY_BTN13
-            Toggle 6            JOY_BTN14
-            Pinkie Switch       JOY_BTN6        1452,803
+                Up              JOY_BTN16       75, 122         333, 122
+                Down            JOY_BTN18       75, 262         333, 262
+                Left            JOY_BTN19       5, 190          263, 190
+                Right           JOY_BTN17       140, 190        396, 190
+            Trigger             JOY_BTN1        1350, 474       1350, 542
+            Second Trigger      JOY_BTN15       1620, 474       1620, 542
+            Toggle 1            JOY_BTN9        103, 622        103, 774
+            Toggle 2            JOY_BTN10       103, 692        103, 844
+            Toggle 3            JOY_BTN11       230, 622        230, 774
+            Toggle 4            JOY_BTN12       230, 692        230, 844
+            Toggle 5            JOY_BTN13       358, 622        358, 774
+            Toggle 6            JOY_BTN14       358, 692        358, 844
+            Pinkie Switch       JOY_BTN6
+            Mode 1              JOY_BTN24       1620, 107
+            Mode 2              JOY_BTN25       1620. 174
+            Mode 3              JOY_BTN26       1620, 244
         Throttle
-            Fire D              JOY_BTN7
-            Fire E              JOY_BTN8
+            Fire D              JOY_BTN7        1365, 1180      1597, 1180
+            Fire E              JOY_BTN8        1365, 968       1597, 968
             Rotary 1
                 Clockwise
                 C-Clockwise
@@ -74,14 +129,14 @@ class X52:
                 Clockwise
                 C-Clockwise
             POV Hat 3
-                Up              JOY_BTN20
-                Down            JOY_BTN22
-                Left            JOY_BTN23
-                Right           JOY_BTN21
+                Up              JOY_BTN20       78, 940         332, 940
+                Down            JOY_BTN22       78, 1081        332, 1081
+                Left            JOY_BTN23       7, 1011         267, 1011
+                Right           JOY_BTN21       142, 1013       400, 1013
             Ministick
-            Throttle Base 1     JOY_BTN27
-            Throttle Base 2     JOY_BTN28
-            Throttle Base 3     JOY_BTN29
+            Throttle Base 1     JOY_BTN27       5, 1500         5, 1582
+            Throttle Base 2     JOY_BTN28       130, 1500       130, 1582
+            Throttle Base 3     JOY_BTN29       258, 1500       2556, 1582
             Precision Slider
             Clutch Fixed
         """
@@ -93,6 +148,7 @@ class X52:
             'JOY_X',
             'JOY_RZ',
             'JOY_RY',
+            'JOY_RX',
         }
 
         self.switch_key = 'JOY_BTN6 - '
@@ -166,4 +222,75 @@ class X52:
             self.switch_key + 'JOY_BTN31': 'm_b_s_1',
             'JOY_BTN33': 'm_w_2_d',
             'JOY_BTN34': 'm_w_2_u',
+        }
+
+        self.position_mapping = {
+            # Joystick
+            'JOY_BTN2': (530, 123, 30, 'stick'),                              # fire
+            self.switch_key + 'JOY_BTN2': (530, 192, 30, 'stick'),            # fire switched
+            'JOY_BTN3': (1350, 101, 30, 'stick'),                             # fire A
+            self.switch_key + 'JOY_BTN3': (1350, 170, 30, 'stick'),           # fire A switched
+            'JOY_BTN4': (1350, 282, 30, 'stick'),                             # fire B
+            self.switch_key + 'JOY_BTN4': (1350, 351, 30, 'stick'),           # fire B switched
+            'JOY_BTN5': (530, 350, 30, 'stick'),                              # fire C
+            self.switch_key + 'JOY_BTN5': (530, 420, 30, 'stick'),            # fire C switched
+            'JOY_BTN_POV1_U': (75, 342, 15, 'stick'),                         # pov hat 1 up
+            'JOY_BTN_POV1_D': (75, 482, 15, 'stick'),
+            'JOY_BTN_POV1_L': (5, 410, 15, 'stick'),
+            'JOY_BTN_POV1_R': (140, 410, 15, 'stick'),
+            self.switch_key + 'JOY_BTN_POV1_U': (333, 342, 15, 'stick'),
+            self.switch_key + 'JOY_BTN_POV1_D': (333, 482, 15, 'stick'),
+            self.switch_key + 'JOY_BTN_POV1_L': (263, 410, 15, 'stick'),
+            self.switch_key + 'JOY_BTN_POV1_R': (396, 410, 15, 'stick'),
+            'JOY_BTN16': (75, 109, 15, 'stick'),                              # pov hat 2 up
+            'JOY_BTN18': (75, 249, 15, 'stick'),                              # down
+            'JOY_BTN19': (5, 177, 15, 'stick'),                               # left -13
+            'JOY_BTN17': (140, 177, 15, 'stick'),                             # right
+            self.switch_key + 'JOY_BTN16': (333, 109, 15, 'stick'),           # pov hat 2 up switched
+            self.switch_key + 'JOY_BTN18': (333, 249, 15, 'stick'),
+            self.switch_key + 'JOY_BTN19': (263, 177, 15, 'stick'),
+            self.switch_key + 'JOY_BTN17': (396, 177, 15, 'stick'),
+            'JOY_BTN1': (1350, 461, 30, 'stick'),                             # trigger
+            self.switch_key + 'JOY_BTN1': (1350, 529, 30, 'stick'),           # trigger switched
+            'JOY_BTN15': (1620, 461, 30, 'stick'),                            # stage 2 trigger
+            self.switch_key + 'JOY_BTN15': (1620, 529, 30, 'stick'),          # stage 2 trigger switched
+            'JOY_BTN9': (103, 609, 15, 'stick'),                              # t1
+            'JOY_BTN10': (103, 679, 15, 'stick'),
+            'JOY_BTN11': (230, 609, 15, 'stick'),
+            'JOY_BTN12': (230, 279, 15, 'stick'),
+            'JOY_BTN13': (358, 609, 15, 'stick'),
+            'JOY_BTN14': (358, 679, 15, 'stick'),
+            self.switch_key + 'JOY_BTN9': (103, 761, 15, 'stick'),            # t1 switched
+            self.switch_key + 'JOY_BTN10': (103, 831, 15, 'stick'),
+            self.switch_key + 'JOY_BTN11': (230, 761, 15, 'stick'),
+            self.switch_key + 'JOY_BTN12': (230, 831, 15, 'stick'),
+            self.switch_key + 'JOY_BTN13': (358, 761, 15, 'stick'),
+            self.switch_key + 'JOY_BTN14': (358, 831, 15, 'stick'),
+            'JOY_BTN6': (0, 0, 0, 'stick'),                                   # pinkie switch
+            'JOY_BTN24': (1620, 96, 30, 'stick'),                             # mode 1
+            'JOY_BTN25': (1620, 163, 30, 'stick'),
+            'JOY_BTN26': (1620, 233, 30, 'stick'),
+            # Throttle - 13 not yet subtracted
+            'JOY_BTN7': (1365, 266, 30, 'throttle'),                            # fire D
+            self.switch_key + 'JOY_BTN7': (1597, 266, 30, 'throttle'),
+            'JOY_BTN8': (1368, 54, 30, 'throttle'),                             # fire E
+            self.switch_key + 'JOY_BTN8': (1597, 54, 30, 'throttle'),
+            'JOY_BTN20': (78, 26, 15, 'throttle'),                              # pov 3 up
+            'JOY_BTN22': (78, 167, 15, 'throttle'),
+            'JOY_BTN23': (7, 97, 15, 'throttle'),
+            'JOY_BTN21': (142, 99, 15, 'throttle'),
+            self.switch_key + 'JOY_BTN20': (332, 26, 15, 'throttle'),           # pov 3 up switched
+            self.switch_key + 'JOY_BTN22': (332, 167, 15, 'throttle'),
+            self.switch_key + 'JOY_BTN23': (267, 97, 15, 'throttle'),
+            self.switch_key + 'JOY_BTN21': (400, 99, 15, 'throttle'),
+            'JOY_BTN27': (5, 586, 15, 'throttle'),                              # throttle 1
+            'JOY_BTN28': (130, 586, 15, 'throttle'),
+            'JOY_BTN29': (258, 586, 15, 'throttle'),
+            self.switch_key + 'JOY_BTN27': (5, 668, 15, 'throttle'),
+            self.switch_key + 'JOY_BTN28': (130, 668, 15, 'throttle'),
+            self.switch_key + 'JOY_BTN29': (258, 668, 15, 'throttle'),
+            'JOY_BTN31': (0, 0, 0, 'throttle'),                                  # mouse button 1
+            self.switch_key + 'JOY_BTN31': (0, 0, 0, 'throttle'),                # mb 1 switched
+            'JOY_BTN33': (0, 0, 0, 'throttle'),                                  # mouse wheel down
+            'JOY_BTN34': (0, 0, 0, 'throttle'),                                  # mouse wheel up
         }
