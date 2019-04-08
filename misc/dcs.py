@@ -12,8 +12,24 @@ class ControlMapper:
             'X52': X52(),
         }
 
+    @staticmethod
+    def draw_text(the_draw, x, y, size, message):
+        font = ImageFont.truetype(
+            os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'font', 'lucon.ttf'),
+            size=12,
+        )
+        color = 'rgb(0, 0, 0)'  # black color
+        while len(message) > size:
+            position = message[0:size].rfind(' ')
+            the_draw.text((x, y), message[0:position], fill=color, font=font)
+            message = message[position + 1:]
+            # next line should be 15 pixels down
+            y += 15
+        # draw the message on the image
+        the_draw.text((x, y), message, fill=color, font=font)
+        return the_draw
+
     def render_controls(self, controls):
-        output = {}
         soup = bs(controls, 'html.parser')
 
         try:
@@ -35,46 +51,44 @@ class ControlMapper:
         throttle_image = Image.open(os.path.join(file_path, 'x52_throttle.png'))
         # initialise the drawing context with
         # the image object as background
-        stick_draw = ImageDraw.Draw(stick_image)
-        throttle_draw = ImageDraw.Draw(throttle_image)
-        font = ImageFont.truetype(
-            os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'font', 'lucon.ttf'),
-            size=12,
-        )
+        draw = {
+            'stick': ImageDraw.Draw(stick_image),
+            'throttle': ImageDraw.Draw(throttle_image),
+        }
 
         table = bs.find(soup, 'table')
+        switches = []
+        # iterate over possible controls
         for row in table.find_all('tr'):
             columns = row.find_all('td')
             control_a = columns[0].text.replace('"', '').strip()
+            # iterate over each bind for the control
             for control in control_a.split('; '):
-                if control in controller.control_mapping:
-                    output[controller.control_mapping[control]] = columns[1].text.replace('"', '').strip()
-                    # starting position of the message
-                    try:
-                        (x, y, size, hotas) = controller.position_mapping[control]
-                    except:
-                        continue
-                    if hotas == 'stick':
-                        the_draw = stick_draw
-                    elif hotas == 'throttle':
-                        the_draw = throttle_draw
-                        print(control)
-                    else:
-                        print("unknown stick type")
-                        continue
-                    message = columns[1].text.replace('"', '').strip()
-                    color = 'rgb(0, 0, 0)'  # black color
-                    while len(message) > size:
-                        position = message[0:size].rfind(' ')
-                        the_draw.text((x, y), message[0:position], fill=color, font=font)
-                        message = message[position+1:]
-                        y += 15
-                    # draw the message on the background
-                    the_draw.text((x, y), message, fill=color, font=font)
-                elif control and control not in controller.ignore_mapping:
-                    print("Found control not mapped to", controller.name, control)
+                # look for a switch
+                if not control or control in controller.ignore_mapping:
+                    continue
+                switched = False
+                if control.find(' - ') > 0:
+                    switch = control.split(' - ')[0]
+                    (x, y, size, hotas) = controller.lookup_position(switch, False)
+                    self.draw_text(draw[hotas], x, y, size, '(SWITCH)')
+                    control = control.split(' - ')[1]
+                    switches.append(switch)
+                    switched = True
+                try:
+                    (x, y, size, hotas) = controller.lookup_position(control, switched)
+                except Exception as e:
+                    print("unknown control - {} - {}".format(control, e))
+                    continue
+                try:
+                    the_draw = draw[hotas]
+                except KeyError:
+                    print("unknown stick type")
+                    continue
+                message = columns[1].text.replace('"', '').strip()
+                self.draw_text(the_draw, x, y, size, message)
 
-        # save the edited image
+        # return the edited images (these are never written to disk)
         stick_output = io.BytesIO()
         throttle_output = io.BytesIO()
         io.BytesIO(stick_image.save(stick_output, format='png', compress_level=9))
@@ -151,8 +165,9 @@ class X52:
             'JOY_RY',
             'JOY_RX',
         }
+        self.switches = []
 
-        self.switch_key = 'JOY_BTN6 - '
+        self.switch_key = ''  # 'JOY_BTN6 - '
 
         self.control_mapping = {
             # Joystick
@@ -228,70 +243,97 @@ class X52:
         self.position_mapping = {
             # Joystick
             'JOY_BTN2': (530, 123, 30, 'stick'),                              # fire
-            self.switch_key + 'JOY_BTN2': (530, 192, 30, 'stick'),            # fire switched
             'JOY_BTN3': (1350, 101, 30, 'stick'),                             # fire A
-            self.switch_key + 'JOY_BTN3': (1350, 170, 30, 'stick'),           # fire A switched
             'JOY_BTN4': (1350, 282, 30, 'stick'),                             # fire B
-            self.switch_key + 'JOY_BTN4': (1350, 351, 30, 'stick'),           # fire B switched
             'JOY_BTN5': (530, 350, 30, 'stick'),                              # fire C
-            self.switch_key + 'JOY_BTN5': (530, 420, 30, 'stick'),            # fire C switched
             'JOY_BTN_POV1_U': (75, 342, 16, 'stick'),                         # pov hat 1 up
             'JOY_BTN_POV1_D': (75, 482, 16, 'stick'),
             'JOY_BTN_POV1_L': (5, 410, 16, 'stick'),
             'JOY_BTN_POV1_R': (140, 410, 16, 'stick'),
-            self.switch_key + 'JOY_BTN_POV1_U': (333, 342, 16, 'stick'),
-            self.switch_key + 'JOY_BTN_POV1_D': (333, 482, 16, 'stick'),
-            self.switch_key + 'JOY_BTN_POV1_L': (263, 410, 16, 'stick'),
-            self.switch_key + 'JOY_BTN_POV1_R': (396, 410, 16, 'stick'),
             'JOY_BTN16': (75, 109, 16, 'stick'),                              # pov hat 2 up
             'JOY_BTN18': (75, 249, 16, 'stick'),                              # down
             'JOY_BTN19': (5, 177, 16, 'stick'),                               # left -13
             'JOY_BTN17': (140, 177, 16, 'stick'),                             # right
-            self.switch_key + 'JOY_BTN16': (333, 109, 16, 'stick'),           # pov hat 2 up switched
-            self.switch_key + 'JOY_BTN18': (333, 249, 16, 'stick'),
-            self.switch_key + 'JOY_BTN19': (263, 177, 16, 'stick'),
-            self.switch_key + 'JOY_BTN17': (396, 177, 16, 'stick'),
             'JOY_BTN1': (1350, 461, 30, 'stick'),                             # trigger
-            self.switch_key + 'JOY_BTN1': (1350, 529, 30, 'stick'),           # trigger switched
             'JOY_BTN15': (1620, 461, 30, 'stick'),                            # stage 2 trigger
-            self.switch_key + 'JOY_BTN15': (1620, 529, 30, 'stick'),          # stage 2 trigger switched
             'JOY_BTN9': (103, 609, 16, 'stick'),                              # t1
             'JOY_BTN10': (103, 679, 16, 'stick'),
             'JOY_BTN11': (230, 609, 16, 'stick'),
             'JOY_BTN12': (230, 679, 16, 'stick'),
             'JOY_BTN13': (358, 609, 16, 'stick'),
             'JOY_BTN14': (358, 679, 16, 'stick'),
-            self.switch_key + 'JOY_BTN9': (103, 761, 16, 'stick'),            # t1 switched
-            self.switch_key + 'JOY_BTN10': (103, 831, 16, 'stick'),
-            self.switch_key + 'JOY_BTN11': (230, 761, 16, 'stick'),
-            self.switch_key + 'JOY_BTN12': (230, 831, 16, 'stick'),
-            self.switch_key + 'JOY_BTN13': (358, 761, 16, 'stick'),
-            self.switch_key + 'JOY_BTN14': (358, 831, 16, 'stick'),
             'JOY_BTN6': (1350, 644, 30, 'stick'),                                   # pinkie switch
             'JOY_BTN24': (1620, 96, 30, 'stick'),                             # mode 1
             'JOY_BTN25': (1620, 163, 30, 'stick'),
             'JOY_BTN26': (1620, 233, 30, 'stick'),
-            # Throttle - 13 not yet subtracted
+            # Throttle
             'JOY_BTN7': (1365, 266, 30, 'throttle'),                            # fire D
-            self.switch_key + 'JOY_BTN7': (1597, 266, 30, 'throttle'),
             'JOY_BTN8': (1368, 54, 30, 'throttle'),                             # fire E
-            self.switch_key + 'JOY_BTN8': (1597, 54, 30, 'throttle'),
             'JOY_BTN20': (78, 26, 16, 'throttle'),                              # pov 3 up
             'JOY_BTN22': (78, 167, 16, 'throttle'),
             'JOY_BTN23': (7, 97, 16, 'throttle'),
             'JOY_BTN21': (142, 99, 16, 'throttle'),
-            self.switch_key + 'JOY_BTN20': (332, 26, 16, 'throttle'),           # pov 3 up switched
-            self.switch_key + 'JOY_BTN22': (332, 167, 16, 'throttle'),
-            self.switch_key + 'JOY_BTN23': (267, 97, 16, 'throttle'),
-            self.switch_key + 'JOY_BTN21': (400, 99, 16, 'throttle'),
             'JOY_BTN27': (5, 586, 16, 'throttle'),                              # throttle 1
             'JOY_BTN28': (130, 586, 16, 'throttle'),
             'JOY_BTN29': (258, 586, 16, 'throttle'),
-            self.switch_key + 'JOY_BTN27': (5, 668, 16, 'throttle'),
-            self.switch_key + 'JOY_BTN28': (130, 668, 16, 'throttle'),
-            self.switch_key + 'JOY_BTN29': (258, 668, 16, 'throttle'),
             'JOY_BTN31': (1367, 483, 30, 'throttle'),                            # mouse button 1
-            self.switch_key + 'JOY_BTN31': (1600, 483, 30, 'throttle'),          # mb 1 switched
             'JOY_BTN33': (61, 302, 16, 'throttle'),                              # mouse wheel down
             'JOY_BTN34': (198, 302, 16, 'throttle'),                             # mouse wheel up
         }
+
+        self.switched_mapping = {
+            # Joystick
+            'JOY_BTN2': (530, 192, 30, 'stick'),  # fire switched
+            'JOY_BTN3': (1350, 170, 30, 'stick'),  # fire A switched
+            'JOY_BTN4': (1350, 351, 30, 'stick'),  # fire B switched
+            'JOY_BTN5': (530, 420, 30, 'stick'),  # fire C switched
+            'JOY_BTN_POV1_U': (333, 342, 16, 'stick'),    # fire pov hat 1
+            'JOY_BTN_POV1_D': (333, 482, 16, 'stick'),
+            'JOY_BTN_POV1_L': (263, 410, 16, 'stick'),
+            'JOY_BTN_POV1_R': (396, 410, 16, 'stick'),
+            'JOY_BTN16': (333, 109, 16, 'stick'),  # pov hat 2 up switched
+            'JOY_BTN18': (333, 249, 16, 'stick'),
+            'JOY_BTN19': (263, 177, 16, 'stick'),
+            'JOY_BTN17': (396, 177, 16, 'stick'),
+            'JOY_BTN1': (1350, 529, 30, 'stick'),  # trigger switched
+            'JOY_BTN15': (1620, 529, 30, 'stick'),  # stage 2 trigger switched
+            'JOY_BTN9': (103, 761, 16, 'stick'),  # t1 switched
+            'JOY_BTN10': (103, 831, 16, 'stick'),
+            'JOY_BTN11': (230, 761, 16, 'stick'),
+            'JOY_BTN12': (230, 831, 16, 'stick'),
+            'JOY_BTN13': (358, 761, 16, 'stick'),
+            'JOY_BTN14': (358, 831, 16, 'stick'),
+            # Throttle
+            'JOY_BTN7': (1597, 266, 30, 'throttle'),  # fire D switched
+            'JOY_BTN8': (1597, 54, 30, 'throttle'),   # fire E switched
+            'JOY_BTN20': (332, 26, 16, 'throttle'),  # pov 3 up switched
+            'JOY_BTN22': (332, 167, 16, 'throttle'),
+            'JOY_BTN23': (267, 97, 16, 'throttle'),
+            'JOY_BTN21': (400, 99, 16, 'throttle'),
+            'JOY_BTN27': (5, 668, 16, 'throttle'),    # throttle 1
+            'JOY_BTN28': (130, 668, 16, 'throttle'),
+            'JOY_BTN29': (258, 668, 16, 'throttle'),
+            'JOY_BTN31': (1600, 483, 30, 'throttle'),  # mb 1 switched
+        }
+
+    def add_switch(self, control):
+        if control not in self.control_mapping:
+            raise Exception("Unknown switch detected - {}".format(control))
+        self.switches.append(control)
+
+    def lookup_control(self, control):
+        if not control:
+            return None, None
+        try:
+            return self.control_mapping[control], False
+        except KeyError:
+            try:
+                return self.control_mapping[control], True
+            except KeyError:
+                return None, None
+
+    def lookup_position(self, control, switched):
+        if switched:
+            return self.switched_mapping[control]
+        else:
+            return self.position_mapping[control]
