@@ -139,36 +139,33 @@
     <script>
         $(function () {
             Highcharts.chart('game_heatmap', {
+                colorAxis: {
+                    minColor: '#FFFFFF',
+                    maxColor: Highcharts.getOptions().colors[0],
+                },
                 series: [{
-                    type: 'wordcloud',
+                    type: 'treemap',
+                    layoutAlgorithm: 'squarified',
                     data: {{ stats['game_heatmap']|safe }},
-                    name: 'Hours played'
                 }],
                 title: {
-                    text: 'Word cloud of players of all games'
-                },
-                plotOptions: {
-                    wordcloud: {
-                        maxFontSize: 8,
-                        minFontSize: 2,
-                    }
-                },
+                    text: 'Heat map of players of all games'
+                }
             });
+            console.log("user heatmap")
             Highcharts.chart('user_heatmap', {
+                colorAxis: {
+                    minColor: '#FFFFFF',
+                    maxColor: Highcharts.getOptions().colors[0],
+                },
                 series: [{
-                    type: 'wordcloud',
+                    type: 'treemap',
+                    layoutAlgorithm: 'squarified',
                     data: {{ stats['user_heatmap']|safe }},
-                    name: 'Occurrences'
                 }],
                 title: {
-                    text: 'Word cloud of games played by all users'
-                },
-                plotOptions: {
-                    wordcloud: {
-                        maxFontSize: 8,
-                        minFontSize: 2,
-                    }
-                },
+                    text: 'Heat map of games played by all users'
+                }
             });
             $('#game_user_count').highcharts({
                 title: {
@@ -327,9 +324,6 @@
                 },
                 minCharacters: 3,
                 onSelect: function (result, response) {
-                    console.log('sselect');
-                    console.log(result);
-                    console.log(response);
                     // title, value, id
                     update_user_stats(result['value']);
                     user_heatmap(result['value'], result['title']);
@@ -347,20 +341,18 @@
             function user_heatmap(user_id, user_name) {
                 $.getJSON('{{ url_for('stats.user_heatmap') }}' + '/' + user_id, function (words) {
                     Highcharts.chart('user_heatmap', {
+                        colorAxis: {
+                            minColor: '#FFFFFF',
+                            maxColor: Highcharts.getOptions().colors[0],
+                        },
                         series: [{
-                            type: 'wordcloud',
+                            type: 'treemap',
+                            layoutAlgorithm: 'squarified',
                             data: words,
-                            name: 'Occurrences'
                         }],
                         title: {
-                            text: 'Wordcloud of games played by ' + user_name
-                        },
-                        plotOptions: {
-                            wordcloud: {
-                                maxFontSize: 8,
-                                minFontSize: 2,
-                            }
-                        },
+                            text: 'Heat map of games played by ' + user_name,
+                        }
                     });
                 });
             }
@@ -393,20 +385,18 @@
             function game_heatmap(game_id, game_name) {
                 $.getJSON('{{ url_for('stats.game_heatmap') }}' + '/' + game_id, function (words) {
                     Highcharts.chart('game_heatmap', {
+                        colorAxis: {
+                            minColor: '#FFFFFF',
+                            maxColor: Highcharts.getOptions().colors[0],
+                        },
                         series: [{
-                            type: 'wordcloud',
+                            type: 'treemap',
+                            layoutAlgorithm: 'squarified',
                             data: words,
-                            name: 'Hours played'
                         }],
                         title: {
-                            text: 'Wordcloud of players of ' + game_name
-                        },
-                        plotOptions: {
-                            wordcloud: {
-                                maxFontSize: 8,
-                                minFontSize: 2,
-                            }
-                        },
+                            text: 'Heat map of players of ' + game_name
+                        }
                     });
                 });
 

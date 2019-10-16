@@ -31,6 +31,7 @@ def overview_data():
     data = {
         'time': 0,
     }
+    # begin overview data
     results = select([
         func.count(config.STATS_GAMES_TABLE.c.name),
     ]).execute().fetchone()
@@ -51,10 +52,10 @@ def overview_data():
         func.count(config.DISCORD_USER_TABLE.c.username),
     ]).execute().fetchone()
     data['users'] = results[0]
+    # end overview data
 
     results = select([
         config.DISCORD_USER_TABLE.c.username,
-        config.STATS_STATS_TABLE.c.userId,
         func.count(func.distinct(config.STATS_STATS_TABLE.c.gameId)).label('count'),
     ]).select_from(
         config.STATS_STATS_TABLE.join(
@@ -83,13 +84,15 @@ def overview_data():
 
 @stats.route('/top_games_by_play_time', methods=['GET'])
 def top_games_by_play_time():
-    g_stats = {}
-    game_mapping = {}
     results = select([
-        config.STATS_STATS_TABLE.c.gameId,
-        config.STATS_STATS_TABLE.c.startTime,
-        config.STATS_STATS_TABLE.c.endTime,
         config.STATS_GAMES_TABLE.c.name,
+        func.sum(
+            func.timestampdiff(
+                text('SECOND'),
+                config.STATS_STATS_TABLE.c.startTime,
+                config.STATS_STATS_TABLE.c.endTime
+            )
+        ).label('time_played')
     ]).select_from(
         config.STATS_STATS_TABLE.join(
             config.STATS_GAMES_TABLE,
@@ -100,17 +103,19 @@ def top_games_by_play_time():
             config.STATS_STATS_TABLE.c.endTime != None,
             ~config.STATS_STATS_TABLE.c.userId.in_(user_blacklist),
         )
+    ).group_by(
+        config.STATS_GAMES_TABLE.c.id,
+    ).order_by(
+        desc(
+            'time_played'
+        )
+    ).limit(
+        5
     ).execute().fetchall()
-    for result in results:
-        if result['gameId'] not in g_stats:
-            game_mapping[result['gameId']] = result['name']
-            g_stats[result['gameId']] = 0
-        g_stats[result['gameId']] += (result['endTime'] - result['startTime']).seconds / 60 / 60
-    raw_top_games = sorted(g_stats, key=g_stats.get, reverse=True)[:5]
 
     top_games = []
-    for game in raw_top_games:
-        top_games.append({'name': game_mapping[game], 'data': [g_stats[game]]})
+    for game in results:
+        top_games.append({'name': game.name, 'data': [float(game.time_played / 60 / 60)]})
     return Response(json.dumps(top_games), mimetype='application/json')
 
 
@@ -215,6 +220,8 @@ def user_stats(user_id=0):
     else:
         where_clause = config.STATS_STATS_TABLE.c.userId != user_id
 
+    print(user_id)
+
     results = select([
         config.STATS_STATS_TABLE.c.gameId,
         config.STATS_STATS_TABLE.c.startTime,
@@ -309,13 +316,11 @@ def game_heatmap(game_id=0):
 
     results = select([
         config.DISCORD_USER_TABLE.c.username,
-        func.sec_to_time(
-            func.sum(
-                func.timestampdiff(
-                    text('SECOND'),
-                    config.STATS_STATS_TABLE.c.startTime,
-                    config.STATS_STATS_TABLE.c.endTime
-                )
+        func.sum(
+            func.timestampdiff(
+                text('SECOND'),
+                config.STATS_STATS_TABLE.c.startTime,
+                config.STATS_STATS_TABLE.c.endTime
             )
         ).label('time_played')
     ]).select_from(
@@ -334,7 +339,11 @@ def game_heatmap(game_id=0):
 
     data = []
     for result in results:
-        data.append({'name': result.username, 'weight': float(result.time_played.total_seconds() / 60 / 60)})
+        data.append({
+            'name': result.username,
+            'value': float(result.time_played / 60 / 60),
+            'colorValue': int(result.time_played / 60 / 60),
+        })
     return Response(json.dumps(data), mimetype='application/json')
 
 
@@ -347,13 +356,11 @@ def user_heatmap(user_id=0):
         where_clause = config.STATS_STATS_TABLE.c.userId != user_id
     results = select([
         config.STATS_GAMES_TABLE.c.name,
-        func.sec_to_time(
-            func.sum(
-                func.timestampdiff(
-                    text('SECOND'),
-                    config.STATS_STATS_TABLE.c.startTime,
-                    config.STATS_STATS_TABLE.c.endTime
-                )
+        func.sum(
+            func.timestampdiff(
+                text('SECOND'),
+                config.STATS_STATS_TABLE.c.startTime,
+                config.STATS_STATS_TABLE.c.endTime
             )
         ).label('time_played')
     ]).select_from(
@@ -368,14 +375,24 @@ def user_heatmap(user_id=0):
         )
     ).group_by(
         config.STATS_STATS_TABLE.c.gameId
+    ).order_by(
+        desc(
+            'time_played',
+        )
+    ).limit(
+        50
     ).execute().fetchall()
 
     data = []
     for result in results:
         if result.time_played:
-            data.append({'name': result.name, 'weight': float(result.time_played.total_seconds() / 60 / 60)})
+            data.append({
+                'name': result.name,
+                'value': float(result.time_played / 60 / 60),
+                'colorValue': int(result.time_played / 60 / 60),
+            })
         else:
-            data.append({'name': result.name, 'weight': 0.0})
+            data.append({'name': result.name, 'value': 0.0, 'colorValue': 0})
     return Response(json.dumps(data), mimetype='application/json')
 
 
@@ -397,7 +414,7 @@ def typeahead():
         for result in results:
             json_results['results'].append({
                 'title': result['username'],
-                'value': result['id']
+                'value': str(result['id']),
             })
         return Response(json.dumps(json_results), mimetype='application/json')
     elif game is not None:
