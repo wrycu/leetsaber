@@ -1,5 +1,6 @@
 import json
 from datetime import timedelta
+import arrow
 
 from flask import Blueprint, render_template, Response, request
 from sqlalchemy import select, and_, asc, desc, func
@@ -33,20 +34,20 @@ def overview_data():
     }
     # begin overview data
     results = select([
-        func.count(config.STATS_GAMES_TABLE.c.name),
+        func.count(config.STATS_GAMES_TABLE.c.id),
     ]).execute().fetchone()
     data['games'] = results[0]
 
     results = select([
-        config.STATS_STATS_TABLE.c.startTime,
-        config.STATS_STATS_TABLE.c.endTime,
-    ]).execute().fetchall()
-    for result in results:
-        if result.endTime:
-            data['time'] += (result.endTime - result.startTime).seconds / 60 / 60  # hours
-        else:
-            data['time'] += (datetime.datetime.now() - result.startTime).seconds / 60 / 60
-    data['time'] = int(data['time'])
+        func.sum(
+            func.timestampdiff(
+                text('SECOND'),
+                config.STATS_STATS_TABLE.c.startTime,
+                config.STATS_STATS_TABLE.c.endTime
+            )
+        )
+    ]).execute().fetchone()
+    data['time'] = int(results[0] / 60 / 60)  # hours
 
     results = select([
         func.count(config.DISCORD_USER_TABLE.c.username),
@@ -54,25 +55,6 @@ def overview_data():
     data['users'] = results[0]
     # end overview data
 
-    results = select([
-        config.DISCORD_USER_TABLE.c.username,
-        func.count(func.distinct(config.STATS_STATS_TABLE.c.gameId)).label('count'),
-    ]).select_from(
-        config.STATS_STATS_TABLE.join(
-            config.DISCORD_USER_TABLE,
-            config.DISCORD_USER_TABLE.c.id == config.STATS_STATS_TABLE.c.userId
-        )
-    ).group_by(
-        config.STATS_STATS_TABLE.c.userId
-    ).order_by(
-        desc(
-            'count'
-        )
-    ).execute().fetchall()
-
-    data['most_shared'] = results[0].username
-    data['least_shared'] = results[-1].username
-    data['shared'] = results
     data['game_overview'] = game_stats(0).json
     data['game_heatmap'] = game_heatmap(0).json
     data['user_overview'] = user_stats(0).json
@@ -110,7 +92,7 @@ def top_games_by_play_time():
             'time_played'
         )
     ).limit(
-        5
+        15
     ).execute().fetchall()
 
     top_games = []
@@ -144,7 +126,7 @@ def top_games_by_user_count():
             g_stats[result['gameId']] = []
         if result['userId'] not in g_stats[result['gameId']]:
             g_stats[result['gameId']].append(result['userId'])
-    raw_top_games = sorted(g_stats, key=lambda k: len(g_stats[k]), reverse=True)[:5]
+    raw_top_games = sorted(g_stats, key=lambda k: len(g_stats[k]), reverse=True)[:15]
 
     top_games = []
     for game in raw_top_games:
@@ -224,27 +206,26 @@ def user_stats(user_id=0):
 
     results = select([
         config.STATS_STATS_TABLE.c.gameId,
-        config.STATS_STATS_TABLE.c.startTime,
-        config.STATS_STATS_TABLE.c.endTime,
+        func.sum(
+            func.timestampdiff(
+                text('SECOND'),
+                config.STATS_STATS_TABLE.c.startTime,
+                config.STATS_STATS_TABLE.c.endTime
+            )
+        ).label('time_played')
     ]).where(
         and_(
             ~config.STATS_STATS_TABLE.c.userId.in_(user_blacklist),
             where_clause,
         )
-    ).order_by(
-        asc(
-            config.STATS_STATS_TABLE.c.startTime
-        )
+    ).group_by(
+        config.STATS_STATS_TABLE.c.gameId
     ).execute().fetchall()
 
     for result in results:
-        if result.endTime:
-            data['hours'] += (result.endTime - result.startTime).seconds / 60 / 60
-        else:
-            data['hours'] += (datetime.datetime.now() - result.startTime).seconds / 60 / 60
-    data['hours'] = int(data['hours'])
+        data['hours'] += int(result.time_played / 60 / 60)
     data['games'] = len(set([x['gameId'] for x in results]))
-    data['days'] = (datetime.datetime.today() - results[0].startTime).days
+    data['days'] = (arrow.now() - arrow.get('2016-02-07')).days
 
     return Response(json.dumps(data), mimetype='application/json')
 
@@ -266,22 +247,23 @@ def game_stats(game_id=0):
 
     results = select([
         config.STATS_STATS_TABLE.c.userId,
-        config.STATS_STATS_TABLE.c.startTime,
-        config.STATS_STATS_TABLE.c.endTime,
+        func.sum(
+            func.timestampdiff(
+                text('SECOND'),
+                config.STATS_STATS_TABLE.c.startTime,
+                config.STATS_STATS_TABLE.c.endTime
+            )
+        ).label('time_played')
     ]).where(
-        and_(
-            ~config.STATS_STATS_TABLE.c.userId.in_(user_blacklist),
-            where_clause,
-        )
+        where_clause,
+    ).group_by(
+        config.STATS_STATS_TABLE.c.userId
     ).execute().fetchall()
 
     players = []
     for result in results:
         players.append(result.userId)
-        if result.endTime:
-            data['hours'] += (result.endTime - result.startTime).seconds / 60 / 60
-        else:
-            data['hours'] += (datetime.datetime.now() - result.startTime).seconds / 60 / 60
+        data['hours'] += int(result.time_played / 60 / 60)
 
     if results:
         data['avg_session'] = round(
@@ -301,7 +283,6 @@ def game_stats(game_id=0):
 
     data['players'] = len(set(players))
     data['percent_players'] = int(len(set(players)) / len(select([config.DISCORD_USER_TABLE.c.username]).execute().fetchall()) * 100)
-    data['hours'] = round(data['hours'], 2)
 
     return Response(json.dumps(data), mimetype='application/json')
 

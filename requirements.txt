@@ -4,3 +4,4 @@ pymysql
 beautifulsoup4
 jinja2
 pillow
+arrow
