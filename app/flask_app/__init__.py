@@ -3,6 +3,7 @@ from app.flask_app.main.controllers import main
 from app.flask_app.stats.controllers import stats
 from app.flask_app.armada.controllers import armada
 from app.flask_app.dcs.controller import dcs
+from app.flask_app.xwing.controllers import xwing
 
 app = Flask(__name__)
 app.config.from_object('app.config')
@@ -17,3 +18,4 @@ app.register_blueprint(main)
 app.register_blueprint(stats, url_prefix='/stats')
 app.register_blueprint(armada, url_prefix='/armada')
 app.register_blueprint(dcs, url_prefix='/dcs')
+app.register_blueprint(xwing, url_prefix='/xwing')

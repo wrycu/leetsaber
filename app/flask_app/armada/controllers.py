@@ -18,6 +18,9 @@ armada = Blueprint(
 def landing():
     #prep_upgrades()
     return render_template(
+        'wip.html',
+    )
+    return render_template(
         'armada/base.html',
     )
 

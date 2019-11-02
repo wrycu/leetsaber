@@ -1,12 +1,4 @@
-import json
-from datetime import timedelta
-
-from flask import Blueprint, render_template, Response, request
-from sqlalchemy import select, and_, asc, desc, func
-from sqlalchemy import text
-import datetime
-
-from app import config
+from flask import Blueprint, redirect, url_for
 
 main = Blueprint(
     'main',
@@ -16,6 +8,8 @@ main = Blueprint(
 
 @main.route('/', methods=['GET'])
 def landing():
-    return render_template(
-        'base.html',
+    return redirect(
+        url_for(
+            'stats.landing'
+        )
     )
