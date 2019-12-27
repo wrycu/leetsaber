@@ -4,6 +4,9 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import io
 import base64
+import dcs as pydcs
+import glob
+from pathlib import Path
 
 
 class ControlMapper:
@@ -337,3 +340,134 @@ class X52:
             return self.switched_mapping[control]
         else:
             return self.position_mapping[control]
+
+
+class MissionParser:
+    def __init__(self):
+        self.msn = pydcs.Mission()
+
+    @staticmethod
+    def list_missions(path=None):
+        return Path(path).glob('**/*.miz')
+
+    def populate_modules(self):
+        pass
+
+    def parse_mission(self, mission_name):
+        data = {
+            'factions': {
+                'blue': {
+                    'slot_count': 0,
+                    'aircraft': {},
+                },
+                'red': {
+                    'slot_count': 0,
+                    'aircraft': {},
+                },
+            },
+            'map': 'unknown',
+            'time': 'unknown',
+            'meets_filter': False,
+            'format': 'unknown',
+        }
+        try:
+            self.msn.load_file(str(mission_name))
+        except Exception as e:
+            print("failed to open mission {} | {}".format(mission_name, str(e)))
+            return data
+        data['map'] = self.msn.terrain.name
+        data['format'] = self.msn.version
+        data['time'] = self.msn.start_time.strftime('%H:%M')
+        for country in self.msn.coalition['blue'].countries:
+            for plane_group in self.msn.coalition['blue'].country(country).plane_group:
+                for plane in plane_group.units:
+                    if not plane.is_human():
+                        continue
+                    if plane.type not in data['factions']['blue']['aircraft']:
+                        data['factions']['blue']['aircraft'][plane.type] = {
+                            'start_type': 'unknown',
+                            'count': 0,
+                        }
+                    data['factions']['blue']['aircraft'][plane.type]['count'] += 1
+                    data['factions']['blue']['slot_count'] += 1
+        for country in self.msn.coalition['red'].countries:
+            for plane_group in self.msn.coalition['red'].country(country).plane_group:
+                for plane in plane_group.units:
+                    if not plane.is_human():
+                        continue
+                    if plane.type not in data['factions']['red']['aircraft']:
+                        data['factions']['red']['aircraft'][plane.type] = {
+                            'start_type': 'unknown',
+                            'count': 0,
+                        }
+                    data['factions']['red']['aircraft'][plane.type]['count'] += 1
+                    data['factions']['red']['slot_count'] += 1
+        return data
+
+
+class MissionSearcher:
+    def __init__(self, pilot_mapping, slots):
+        """
+        pilot_mapping
+        {
+            "pokej6": [
+                "A-10C",
+                ...
+            ],
+            ...
+        }
+        slots
+        {
+            "A-10C": 1,
+            ...
+        }
+        """
+        self.slots = slots
+        self.state = {x: None for x in pilot_mapping.keys()}
+        self.pilot_mapping = pilot_mapping
+
+    def solve(self, pilots):
+        """
+        pilots
+        {
+            "pokej6": "A-10C",
+            "wrycu": None,
+            ...
+        }
+        """
+        try:
+            pilot = self.find_empty(pilots)
+        except IndexError:
+            return True
+        for module in self.pilot_mapping[pilot]:
+            if self.valid(pilots, module):
+                pilots[pilot] = module
+                # we've made an assignment; see if we've solved everything
+                if self.solve(pilots):
+                    return True
+                # did not work - back out the change
+                pilots[pilot] = None
+        return False
+
+    def find_empty(self, pilots):
+        """
+        Find a pilot associated with None
+        Raises an exception if all pilots are assigned
+        """
+        return [x for x in pilots.keys() if not pilots[x]][0]
+
+    def valid(self, pilots, module):
+        """
+        Given an existing mapping of pilots to modules, determine if a new nominated mapping results in an invalid state
+        """
+        assigned_count = 0
+        for slot in pilots.values():
+            if slot == module:
+                assigned_count += 1
+        if module not in self.slots or assigned_count + 1 > self.slots[module]:
+            return False
+        else:
+            return True
+
+
+

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="ui grid">
+    <div class="one wide column"></div><div class="two wide column">
+        <div class="ui message">
+            <div class="header">
+                Considering
+            </div>
+            <p>
+                <table class="ui very basic table">
+                    {% for player in players %}
+                        <tr>
+                            <td>
+                                {{ player }}
+                            </td>
+                            <td>
+                                {% for plane in modules[player] %}
+                                    {{ plane }}&nbsp;
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </p>
+        </div>
+    </div>
+</div>
+
+<table class="ui sortable celled table">
+    <thead>
+        <tr>
+            <th>Meets Filter</th>
+            <th>Mission</th>
+            <th>Start Time</th>
+            <th>Units (blue)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mission_name, mission_data in missions.items() %}
+            <tr>
+                <td class="one wide">
+                    {% if mission_data['meets_filter'] %}
+                        <i class="large green checkmark icon"></i>
+                    {% else %}
+                        <i class="large red ban icon"></i>
+                    {% endif %}
+                </td>
+                <td class="two wide">
+                    {{ mission_name }}
+                </td>
+                <td class="one wide">
+                    {{ mission_data['time'] }}
+                </td>
+                <td>
+                    <table class="ui very basic collapsing celled table">
+                    <tbody>
+                    <tr>
+                    {% for aircraft, details in mission_data['factions']['blue']['aircraft'].items() %}
+                            <td>
+                                {{ aircraft }}
+                            </td>
+                    {% endfor %}
+                    </tr><tr>
+                    {% for aircraft, details in mission_data['factions']['blue']['aircraft'].items() %}
+                        <td>
+                            {{ details['count'] }}
+                        </td>
+                    {% endfor %}
+                    </tr>
+                    </tbody>
+                    </table>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

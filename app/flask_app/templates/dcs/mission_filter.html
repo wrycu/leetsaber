@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="ui grid">
+    <div class="row">
+        <div class="one wide column"></div>
+        <div class="ui form">
+            <div class="inline fields">
+                <label>Select pilot grouping</label>
+                <div class="field">
+                    <div class="ui radio checkbox">
+                        <input type="radio" name="p_grouping" id="p_grouping_leetsaber" checked="checked">
+                        <label>Leetsaber</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui radio checkbox">
+                        <input type="radio" name="p_grouping" id="p_grouping_st">
+                        <label>ST</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="one wide column"></div>
+        <div class="five wide column">
+            <!--
+            We have two dropdowns here because of a semantic UI bug where modifying the value of the dropdown
+                dynamically causes an inability to read values (and receive onChange, onAdd, onRemove events x.x)
+            -->
+            <div id="pilot_parent_p_grouping_leetsaber">
+                <select name="pilots" id="p_grouping_leetsaber_pilots" multiple="" class="ui fluid search dropdown">
+                    <option value="">Pilots</option>
+                    {% for pilot in pilots['leetsaber'].keys() %}
+                        <option value="{{ pilot }}">{{ pilot }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="pilot_parent_p_grouping_st">
+                <select name="pilots" id="p_grouping_st_pilots" multiple="" class="ui fluid search dropdown">
+                    <option value="">Pilots</option>
+                    {% for pilot in pilots['st'].keys() %}
+                        <option value="{{ pilot }}">{{ pilot }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="two wide column">
+            <button class="ui positive basic button" id="pilot_search">Search</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="one wide column"></div>
+        <div id="filter_results"></div>
+    </div>
+</div>
+<script>
+    function set_pilots(group) {
+        $('#pilot_parent_p_grouping_leetsaber').css('display', 'none');
+        $('#pilot_parent_p_grouping_st').css('display', 'none');
+        $('#pilot_parent_' + group).css('display', 'inline');
+    };
+
+    function set_filter_response(body) {
+        console.log("success :)")
+        $('#filter_results').html(body)
+    };
+    $(function () {
+        set_pilots('p_grouping_leetsaber');
+        // selector for ST vs leetsaber
+        $('.ui.checkbox').checkbox().each(function () {
+            $(this).checkbox({
+                onChecked: function() {
+                    set_pilots(this.id);
+                }
+            });
+        });
+        // search using the pilots
+        // TODO: this is bugged if someone selects an ST pilot, swaps it to leetsaber, selects a leetsaber pilot, and
+        // hits search
+        $('#pilot_search').click(function(){
+            var pilots = $('#p_grouping_st_pilots').dropdown('get value');
+            var context = 'st';
+            if (pilots === null) {
+                // we failed to get data - assume we need to hit up the other dropdown
+                var pilots = $('#p_grouping_leetsaber_pilots').dropdown('get value');
+                var context = 'leetsaber'
+            }
+            $.ajax({
+                url: "{{ url_for('dcs.list_missions') }}",
+                type: "POST",
+                data: JSON.stringify({
+                    'pilot': pilots,
+                    'context': context,
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function(result) {
+                    $('#filter_results').html(result['status'])
+                }
+            });
+        })
+    });
+</script>
+{% endblock %}

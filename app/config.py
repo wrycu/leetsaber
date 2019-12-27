@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine, MetaData
 from configparser import ConfigParser
 import os
-from misc.dcs import ControlMapper
+from misc.t_dcs import ControlMapper
+from misc.gdrive import GDrive
 
 DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -28,10 +29,23 @@ conf = {
             'port': config.get('armada', 'port'),
             'db': config.get('armada', 'db'),
         },
+        'dcs': {
+            'user': config.get('dcs', 'user'),
+            'pass': config.get('dcs', 'pass'),
+            'host': config.get('dcs', 'host'),
+            'port': config.get('dcs', 'port'),
+            'db': config.get('dcs', 'db'),
+        },
     },
     'discord': {
         'email': config.get('discord', 'email'),
         'pass': config.get('discord', 'pass'),
+    },
+    'gdrive': {
+        'access_token': config.get('google-drive', 'access_token'),
+        'refresh_token': config.get('google-drive', 'refresh_token'),
+        'client_id': config.get('google-drive', 'client_id'),
+        'client_secret': config.get('google-drive', 'client_secret'),
     },
 }
 engine = create_engine(
@@ -43,6 +57,12 @@ engine = create_engine(
         db=conf['mysql']['stats']['db'],
     )
 )
+
+STATS_DB_META = MetaData(bind=engine, reflect=True)
+DISCORD_USER_TABLE = STATS_DB_META.tables['users']
+STATS_GAMES_TABLE = STATS_DB_META.tables['games']
+STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
+
 #armada_engine = create_engine(
 #    'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'.format(
 #        user=conf['mysql']['armada']['user'],
@@ -52,10 +72,23 @@ engine = create_engine(
 #        db=conf['mysql']['armada']['db'],
 #    )
 #)
-STATS_DB_META = MetaData(bind=engine, reflect=True)
-DISCORD_USER_TABLE = STATS_DB_META.tables['users']
-STATS_GAMES_TABLE = STATS_DB_META.tables['games']
-STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
+
+dcs_engine = create_engine(
+    'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'.format(
+        user=conf['mysql']['dcs']['user'],
+        password=conf['mysql']['dcs']['pass'],
+        host=conf['mysql']['dcs']['host'],
+        port=conf['mysql']['dcs']['port'],
+        db=conf['mysql']['dcs']['db'],
+    )
+)
+
+DCS_DB_META = MetaData(bind=dcs_engine, reflect=True)
+DCS_MISSION_TABLE = DCS_DB_META.tables['missions']
+DCS_MODULE_TABLE = DCS_DB_META.tables['modules']
+DCS_M_M_TABLE = DCS_DB_META.tables['mission_module_count']
+
+
 #ARMADA_DB_META = MetaData(bind=armada_engine, reflect=True)
 #A_FLEET_TABLE = ARMADA_DB_META.tables['fleets']
 #A_FLEET_MEMBERSHIP_TABLE = ARMADA_DB_META.tables['fleet_membership']
@@ -70,3 +103,10 @@ STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
 #A_UPGRADE_TABLE = ARMADA_DB_META.tables['upgrades']
 #A_USER_TABLE = ARMADA_DB_META.tables['users']
 CONTROL_MAPPER = ControlMapper()
+
+GDRIVE = GDrive(
+    conf['gdrive']['client_id'],
+    conf['gdrive']['client_secret'],
+    conf['gdrive']['refresh_token'],
+    conf['gdrive']['access_token'],
+)
