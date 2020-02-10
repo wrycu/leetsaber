@@ -5,8 +5,8 @@ import os
 import io
 import base64
 import dcs as pydcs
-import glob
 from pathlib import Path
+import glob
 
 
 class ControlMapper:
@@ -370,11 +370,10 @@ class MissionParser:
             'meets_filter': False,
             'format': 'unknown',
         }
-        try:
-            self.msn.load_file(str(mission_name))
-        except Exception as e:
-            print("failed to open mission {} | {}".format(mission_name, str(e)))
+        skip = []
+        if str(mission_name) in skip:
             return data
+        self.msn.load_file(str(mission_name))
         data['map'] = self.msn.terrain.name
         data['format'] = self.msn.version
         data['time'] = self.msn.start_time.strftime('%H:%M')
@@ -468,6 +467,3 @@ class MissionSearcher:
             return False
         else:
             return True
-
-
-

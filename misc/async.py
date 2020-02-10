@@ -1,38 +1,32 @@
 import configparser
-import requests
 from t_dcs import MissionParser
 from gdrive import GDrive
-import sqlalchemy
 from sqlalchemy import create_engine, MetaData, select
 import hashlib
 import os
-import json
 
 
 def download_missions(gdocs):
+    """
+    Given a google drive object, download missions in the provided folder
+    :param gdocs:
+    :return:
+    """
+    # 'ShackTac DCS/Missions' folder
     mission_folder_id = '1gstx6nmHFxXS10QWqEhyhnA84J72ay_I'
     return gdocs.download_zip(
         mission_folder_id
     ).content.decode('utf-8')
 
 
-def parse_missions():
-    pass
-
-
-def new_mission():
-    pass
-
-
-def update_mission():
-    pass
-
-
-def insert_mission():
-    pass
-
-
 def mission_hash(mission_path):
+    """
+    Calculate the hex digest of a given file
+    :param mission_path:
+        path to mission file
+    :return:
+        STR of hex digest (MD5 for speed)
+    """
     m = hashlib.md5()
     with open(mission_path, 'rb') as mission_file:
         m.update(mission_file.read())
@@ -40,8 +34,17 @@ def mission_hash(mission_path):
 
 
 def get_unit(unit, pretty_to_dcs):
+    """
+    Given a unit, get the mapping
+    pydcs calls units one thing, while the spread sheets we're parsing for module ownership call them another
+    As such, we need to be able to pivot between the two
+    :param unit:
+    :param pretty_to_dcs:
+    :return:
+    """
     pretty_dcs = {
         'FC-3 or 4': [
+            # "FC3" refers to many modules
             'A-10A',
             'F-15C',
             'J-11A',
@@ -75,6 +78,7 @@ def get_unit(unit, pretty_to_dcs):
         ],
         'F-5': [
             'F-5E-3',
+            'F-5E',
         ],
         'F-14': [
             'F-14B',
@@ -141,7 +145,7 @@ def get_unit(unit, pretty_to_dcs):
         ],
     }
     dcs_pretty = {
-        'A-10A': 'FC-3 or 4',
+        'A-10A': 'FC-3 or 4',  # all FC3 modules map to FC3
         'F-15C': 'FC-3 or 4',
         'J-11A': 'FC-3 or 4',
         'MiG-29K': 'FC-3 or 4',
@@ -160,6 +164,7 @@ def get_unit(unit, pretty_to_dcs):
         'C-101CC': 'C-101',
         'C-101EB': 'C-101',
         'F-5E-3': 'F-5',
+        'F-5E': 'F-5',
         'F-14B': 'F-14',
         'F-16C bl.52d': 'F-16',
         'FA-18C_hornet': 'F/A-18C',
@@ -191,6 +196,13 @@ def get_unit(unit, pretty_to_dcs):
 
 
 def add_modules(mission_data, the_table):
+    """
+    For a given mission, add all of the modules to the DB
+    :param mission_data:
+    :param the_table:
+    :return:
+        N/A
+    """
     module_list = {}
     data = []
     for faction in mission_data['factions'].values():
@@ -211,7 +223,11 @@ def add_modules(mission_data, the_table):
 
 
 if __name__ == '__main__':
-
+    """
+    You may run this file directly to update the listing of missions
+    (it was, in fact, intended to be run directly!)
+    TODO: add parameters or something to make it not print as much to stdout
+    """
     conf_obj = configparser.ConfigParser()
     conf_obj.read('../config.ini')
     conf = {
@@ -319,5 +335,3 @@ if __name__ == '__main__':
             }).execute().inserted_primary_key
             existing_missions[m_name] = m_digest
         add_modules(m_data, m_m_join_table)
-
-
