@@ -5,7 +5,7 @@
         <i class="dropdown icon"></i>
         <div class="menu">
             <a href="{{ url_for('stats.landing') }}" class="item"><i class="line chart icon"></i>Stats</a>
-            <a class="item"><i class="settings icon"></i>Administration</a>
+            <a href="{{ url_for('xwing.landing') }}" class="item"><i class="settings icon"></i>Administration</a>
         </div>
     </div>
     <div class="ui dropdown item">
@@ -21,7 +21,7 @@
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     <a href="{{ url_for('dcs.landing') }}" class="item">Controller mapping</a>
-                    <a href="{{ url_for('dcs.landing') }}" class="item">Mission filter</a>
+                    <a href="{{ url_for('dcs.list_missions') }}" class="item">Mission filter</a>
                 </div>
             </div>
         </div>
