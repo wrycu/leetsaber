@@ -4,6 +4,53 @@
 <div class="ui grid">
     <div class="row">
         <div class="one wide column"></div>
+        <div class="ui styled accordion">
+            <div class="title">
+                <i class="dropdown icon"></i>
+                What is this?
+            </div>
+            <div class="content">
+                <p class="transition hidden">
+                    The DCS mission filter <b>finds missions</b> which match the module ownership for an <b>arbitrary selection of pilots</b>.
+                </p>
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                How does the filter know which modules someone owns?
+            </div>
+            <div class="content">
+                <p class="transition hidden">
+                    Both ST and Leetsaber have <b>spreadsheets</b> tracking who owns which module.  These are treated as the source of truth and are read in realtime.
+                </p>
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                Which missions are searched?
+            </div>
+            <div class="content">
+                <p>
+                    The <b>ST mission folder</b> on Google Drive and whichever missions I happen to have downloaded are searched.
+                </p><p>
+                The missions are downloaded regularly and <b>parsed asynchronously</b> to cut down on the parsing time.
+                </p>
+            </div>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                What's coming?
+            </div>
+            <div class="content">
+                <p>
+                    The ability to <b>download</b> missions.
+                </p><p>
+                    Indexing of all missions tracked on the official DCS site
+                </p><p>
+                    Minor UI enhancements and bug fixes
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="one wide column"></div>
         <div class="ui form">
             <div class="inline fields">
                 <label>Select pilot grouping</label>
@@ -67,6 +114,8 @@
         $('#filter_results').html(body)
     };
     $(function () {
+        // FAQ section
+        $('.ui.accordion').accordion();
         set_pilots('p_grouping_leetsaber');
         // selector for ST vs leetsaber
         $('.ui.checkbox').checkbox().each(function () {

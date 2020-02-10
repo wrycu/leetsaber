@@ -70,4 +70,5 @@ INSERT INTO dcs.modules (name, type) VALUES
 ('Yak-52', 'fixed_wing'),
 ('CE2', 'fixed_wing'),
 ('Hawk', 'fixed_wing'),
-('JF-17', 'fixed_wing')
+('JF-17', 'fixed_wing'),
+('Mig-23', 'fixed_wing')
