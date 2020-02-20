@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)https://crobi.github.io/dnd5e-quickref/preview/quickref.html -->
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>D&amp;D 5e quick reference</title>
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fad.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/icons.css') }}">
+</head>
+<body class="page-background">
+<div class="page fontsize" data-size="fullscreen">
+    <!-- Action section -->
+        <div id="section-action" class="section-container">
+            <div class="section-title">
+                Action <span class="float-right">1/turn</span>
+            </div>
+            <div class="section-content">
+                <div class="section-row section-subtitle text fontsize">
+                    You can also interact with one object or feature of the
+                    environment for free.
+                </div>
+                <div class="section-row" id="basic-action"></div>
+            </div>
+        </div>
+    <!-- Movement section -->
+    <div id="section-movement" class="section-container">
+        <div class="section-title">
+            Maneuver <span class="float-right">Max 2/turn</span>
+        </div>
+        <div class="section-content">
+            <div class="section-row section-subtitle text fontsize">
+                Maneuvers are activities that aren't complex enough to warrant a skill check, but which still involve
+                time and effort on the part of the character.<br>
+                You can move before or after your action. Cost is identical in both directions.
+            </div>
+            <div class="section-row" id="basic-movement">
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Move</div>
+                        <div class="item-desc">Engaged to short, cost: 1 maneuver</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Aim</div>
+                        <div class="item-desc">Cost: 1 maneuver</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Assist</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Guarded Stance</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Interact with the environment</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Manage Gear</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Mount or dismount</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Move</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Drop or stand</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-run"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Preparation</div>
+                        <div class="item-desc">Cost: 2 maneuvers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action section -->
+    <div id="section-action" class="section-container">
+        <div class="section-title">
+            Action<span class="float-right">1/turn</span>
+        </div>
+        <div class="section-content">
+            <div class="section-row section-subtitle text fontsize">
+                You can also interact with one object or feature of the
+                environment for free.
+            </div>
+            <div class="section-row" id="basic-actions">
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-crossed-swords"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Attack</div>
+                        <div class="item-desc">Melee or ranged attack</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-grab"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Downgrade to maneuver</div>
+                        <div class="item-desc">Special melee attack</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-hand"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Activate an ability</div>
+                        <div class="item-desc">Special melee attack</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-magic-swirl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Use a force power</div>
+                        <div class="item-desc">Cast time of 1 action</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-sprint"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Perform a skill check</div>
+                        <div class="item-desc">Double movement speed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bonus action section -->
+    <div id="section-bonus-action" class="section-container">
+        <div class="section-title">
+            Incidental<span class="float-right">Any number/turn</span>
+        </div>
+        <div class="section-content">
+            <div class="section-row section-subtitle text fontsize">
+                Incidentals are minor activities characters can undertake that require very little time or effort.
+                <br>Dropping a broken comlink, speaking to a friend, or switching a blaster pistol to stun are
+                incidentals.
+            </div>
+            <div class="section-row" id="basic-bonus-actions">
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-crossed-swords"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Speak to another character</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-magic-swirl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Dropping an item held in one's hands</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-embrassed-energy"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Releasing someone the character is holding</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-embrassed-energy"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Minor movements such as shifting position, peeking around a corner, or
+                            looking behind a person</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reaction section -->
+    <div id="section-reaction" class="section-container">
+        <div class="section-title">
+            Attack<span class="float-right">max. 1/round</span>
+        </div>
+        <div class="section-content">
+            <div class="section-row section-subtitle text fontsize">
+                Perform a combat check
+            </div>
+            <div class="section-row" id="basic-reactions">
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-crossed-swords"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Declare attack</div>
+                        <div class="item-desc">Enemy leaves your reach</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-stopwatch"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Assemble dice pool</div>
+                        <div class="item-desc">Part of your Ready action</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-magic-swirl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Pool results and deal damage</div>
+                        <div class="item-desc">Cast time of 1 reaction</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-magic-swirl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Resolve advantage and triumph</div>
+                        <div class="item-desc">Cast time of 1 reaction</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-magic-swirl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Resolve disadvantage and threat</div>
+                        <div class="item-desc">Cast time of 1 reaction</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-magic-swirl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Reduce and apply damage, critical injuries</div>
+                        <div class="item-desc">Cast time of 1 reaction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Condition section -->
+    <div id="section-condition" class="section-container">
+        <div class="section-title">
+            Qualities
+        </div>
+        <div class="section-content">
+            <div class="section-row section-subtitle text fontsize">
+                Passive qualities are always on. Active must be triggered, often with advantage.
+            </div>
+            <div class="section-row" id="basic-conditions">
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-one-eyed"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Accurate</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-smitten"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Auto-fire</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-elf-ear"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Blast</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-crawl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Breach</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-sharp-smile"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Burn</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-grab"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Concussive</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-internal-injury"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Cortosis</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-invisible"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Cumbersome</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-internal-injury"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Defensive</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-stone-pile"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Deflection</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-deathcab"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Disorient</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-crawl"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Ensnare</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-imprisoned"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Guided</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-internal-injury"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Knockdown</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Inaccurate</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Inferior</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Ion</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Limited Ammo</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Linked</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Pierce</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Prepare</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Slow-firing</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Stun</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Stun Damage</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Sunder</div>
+                        <div class="item-desc">Active</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Superior</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Tractor</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Unwieldy</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+                <div class="item itemsize">
+                    <div class="item-icon iconsize icon-coma"></div>
+                    <div class="item-text-container text">
+                        <div class="item-title">Vicious</div>
+                        <div class="item-desc">Passive</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal" tabindex="-1">
+    <div class="modal-backdrop" id="modal-backdrop" style="height: 969px;"></div>
+    <div class="modal-dialog modalsize">
+        <div class="section-container modal-container" id="modal-container"
+             style="background-color: rgb(0, 0, 0); border-color: rgb(0, 0, 0);">
+            <div class="section-title" id="modal-title">Escape<span class="float-right">Action</span></div>
+            <div class="section-content">
+                <div class="section-row section-subtitle text" id="modal-subtitle">Escape a grapple</div>
+                <div class="section-row text">
+                    <div id="modal-bullets"><p class="fonstsize">To escape a grapple, you must succeed on a Strength
+                        (Athletics) or Dexterity (Acrobatics) check contested by the grappler's Strength (Athletics)
+                        check.</p>
+                        <hr>
+                        <p class="fonstsize">Escaping other conditions that restrain you (such as manacles) may require
+                            a Dexterity or Strength check, as specified by the condition.</p></div>
+                </div>
+                <div class="section-row text" id="modal-reference">PHB, pg. 195.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/fad/data_maneuver.js') }}" charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/fad/data_action.js') }}" charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/fad/data_incidental.js') }}" charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/fad/data_attack.js') }}" charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/fad/data_qualities.js') }}" charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/fad/quickref.js') }}" charset="utf-8"></script>
+</body>
+</html>

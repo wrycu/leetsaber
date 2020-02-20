@@ -544,6 +544,7 @@ def game_user_count():
     for game, data in games.items():
         # make sure all lines are set to invisible since we presumably have a ton of
         # games to display and we don't want to crowd the graph
+
         # TODO: Set the Top X games to be visible
         game_series.append({'name': game, 'data': data, 'visible': False})
 

@@ -34,6 +34,7 @@ conf = {
         'pass': config.get('discord', 'pass'),
     },
 }
+
 engine = create_engine(
     'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'.format(
         user=conf['mysql']['user'],
@@ -56,6 +57,7 @@ STATS_DB_META = MetaData(bind=engine, reflect=True)
 DISCORD_USER_TABLE = STATS_DB_META.tables['users']
 STATS_GAMES_TABLE = STATS_DB_META.tables['games']
 STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
+
 #ARMADA_DB_META = MetaData(bind=armada_engine, reflect=True)
 #A_FLEET_TABLE = ARMADA_DB_META.tables['fleets']
 #A_FLEET_MEMBERSHIP_TABLE = ARMADA_DB_META.tables['fleet_membership']
