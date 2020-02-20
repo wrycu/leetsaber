@@ -1,3 +1,7 @@
+CREATE DATABASE dcs;
+
+USE dcs;
+
 CREATE TABLE `missions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL,
@@ -71,4 +75,4 @@ INSERT INTO dcs.modules (name, type) VALUES
 ('CE2', 'fixed_wing'),
 ('Hawk', 'fixed_wing'),
 ('JF-17', 'fixed_wing'),
-('Mig-23', 'fixed_wing')
+('Mig-23', 'fixed_wing');
