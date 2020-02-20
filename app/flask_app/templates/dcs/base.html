@@ -1,71 +1,99 @@
 {% extends "base.html" %}
 
 {% block body %}
-<div class="ui grid">
-    <div class="centered row">
-        <form method="post" id="myform">
-            <div class="field">
-                <div class="ui action input">
-                    <label for="controls" class="ui icon button">
-                        <i class="attach icon"></i>
-                        Upload
-                        <input type="file" id="controls" name="controls" style="display: none">
-                    </label>
+    <div class="ui grid">
+        <div class="centered row">
+            <div class="ui message">
+                <i class="close icon"></i>
+                <div class="header">
+                    Control mapper
                 </div>
+                <p>This page parses control mappings and creates a visual representation of what's bound to what</p>
             </div>
-        </form>
-    </div>
-    <div class="row">
-        <div class="five wide column"></div>
-        <div class="three wide column">
-            <div id="stick"></div>
         </div>
-        <div class="three wide column">
-            <div id="throttle"></div>
+        <div class="row">
+            <div class="seven wide column"></div>
+            <ol class="ui list">
+                <li>
+                    Export controls
+                    <ol>
+                        <li>Launch DCS</li>
+                        <li>Options</li>
+                        <li>Controls</li>
+                        <li>Select aircraft</li>
+                        <li>"Make HTML" for each controller</li>
+                    </ol>
+                </li>
+                <li>Select HOTAS</li>
+                <li>Upload controls</li>
+                <li>Download visual control representation</li>
+            </ol>
         </div>
-        <div class="five wide column"></div>
+        <div class="centered row">
+            <form method="post" id="myform">
+                <div class="field">
+                    <div class="ui action input">
+                        <label for="controls" class="ui icon button">
+                            <i class="attach icon"></i>
+                            Upload
+                            <input type="file" id="controls" name="controls" style="display: none">
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <div class="five wide column"></div>
+            <div class="three wide column">
+                <div id="stick"></div>
+            </div>
+            <div class="three wide column">
+                <div id="throttle"></div>
+            </div>
+            <div class="five wide column"></div>
+        </div>
     </div>
-</div>
 
-<div id="error" class="ui modal">
-    <div class="header">Error</div>
-    <div id="error_content" class="content"></div>
-</div>
+    <div id="error" class="ui modal">
+        <div class="header">Error</div>
+        <div id="error_content" class="content"></div>
+    </div>
 
-<script>
-$(document).ready(function () {
-    $("#controls").change(function(){
-        var formData = new FormData($("#myform")[0]);
-		$.ajax({
-            url: "{{ url_for('dcs.upload') }}",
-            type: 'POST',
-            data: formData,
-            processData: false,  // tell jQuery not to process the data
-            contentType: false,  // tell jQuery not to set contentType
-            success: function(data) {
-                $("#stick").html(data.split('|')[0]);
-                $("#throttle").html(data.split('|')[1]);
-                $("#stick_save").on("click", function(){
-                    save_pic('stick');
+    <script>
+        $(document).ready(function () {
+            $("#controls").change(function(){
+                var formData = new FormData($("#myform")[0]);
+                console.log(formData);
+                $.ajax({
+                    url: "{{ url_for('dcs.upload') }}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // tell jQuery not to process the data
+                    contentType: false,  // tell jQuery not to set contentType
+                    success: function(data) {
+                        $("#stick").html(data.split('|')[0]);
+                        $("#throttle").html(data.split('|')[1]);
+                        $("#stick_save").on("click", function(){
+                            save_pic('stick');
+                        });
+                        $("#throttle_save").on("click", function(){
+                            save_pic('throttle');
+                        });
+                        return;
+                    },
+                    error: function(xhr, text, error) {
+                        $("#error_content").text(xhr.responseText);
+                        $('.ui.modal').modal('show');
+                    },
                 });
-                $("#throttle_save").on("click", function(){
-                    save_pic('throttle');
-                });
-                return;
-            },
-            error: function(xhr, text, error) {
-                $("#error_content").text(xhr.responseText);
-                $('.ui.modal').modal('show');
-            },
-		});
-    });
+            });
 
-    function save_pic(controller) {
-        var link = document.createElement("a");
-        link.setAttribute("href", $('#' + controller + '_data').attr('src'));
-        link.setAttribute("download", controller + '.png');
-        link.click();
-    }
-});
-</script>
+            function save_pic(controller) {
+                var link = document.createElement("a");
+                link.setAttribute("href", $('#' + controller + '_data').attr('src'));
+                link.setAttribute("download", controller + '.png');
+                link.click();
+            }
+        });
+    </script>
 {% endblock %}

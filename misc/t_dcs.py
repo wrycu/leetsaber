@@ -9,15 +9,67 @@ from pathlib import Path
 import glob
 SIZE_LARGE = 45
 SIZE_NORMAL = 30
+SIZE_MEDIUM = 20
 SIZE_SMALL = 16
 
 
-class ControlMapper:
-    def __init__(self):
-        self.controllers = {
-            'X52': X52(),
-            'Warthog': Warthog(),
-        }
+class Renderer:
+    def __init__(self, controller_type, controller_image):
+        self.controller_type = controller_type
+        self.controller_image = controller_image
+
+    def render(self, controls, parent):
+        soup = bs(controls, 'html.parser')
+        file_path = os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'img')
+        # initialise the drawing context with
+        # the image object as background
+        image = Image.open(os.path.join(file_path, self.controller_image))
+        draw = ImageDraw.Draw(image)
+        table = bs.find(soup, 'table')
+        switches = []
+        # iterate over possible controls
+        for row in table.find_all('tr'):
+            columns = row.find_all('td')
+            control_a = columns[0].text.replace('"', '').strip()
+            # iterate over each bind for the control
+            for control in control_a.split('; '):
+                # look for a switch
+                if not control or control in parent.ignore_mapping:
+                    continue
+                switched = False
+                if control.find(' - ') > 0:
+                    switch = control.split(' - ')[0]
+                    (x, y, size, hotas) = parent.lookup_position(switch, False)
+                    if hotas != self.controller_type:
+                        # We've pulled a control for an object other than the type we're currently parsing; ignore it
+                        continue
+                    self.draw_text(draw, x, y, size, '(SWITCH)')
+                    control = control.split(' - ')[1]
+                    switches.append(switch)
+                    switched = True
+                try:
+                    (x, y, size, hotas) = parent.lookup_position(control, switched)
+                    if hotas != self.controller_type:
+                        # We've pulled a control for an object other than the type we're currently parsing; ignore it
+                        continue
+                except Exception as e:
+                    print("unknown control - {} - {}".format(control, e))
+                    continue
+                try:
+                    the_draw = draw
+                except KeyError:
+                    print("unknown stick type")
+                    continue
+                message = columns[1].text.replace('"', '').strip()
+                print(the_draw, x, y, size, message)
+                self.draw_text(the_draw, x, y, size, message)
+
+        # return the edited images (these are never written to disk)
+        output = io.BytesIO()
+        io.BytesIO(image.save(output, format='png', compress_level=9))
+
+        output.seek(0)
+        return base64.b64encode(output.getvalue()).decode('utf-8')
 
     @staticmethod
     def draw_text(the_draw, x, y, size, message):
@@ -36,6 +88,11 @@ class ControlMapper:
         the_draw.text((x, y), message, fill=color, font=font)
         return the_draw
 
+
+class ControlMapper:
+    def __init__(self):
+        pass
+
     def render_controls(self, controls):
         soup = bs(controls, 'html.parser')
 
@@ -44,69 +101,31 @@ class ControlMapper:
         except Exception:
             raise Exception("Invalid/malformed file format")
         # detect controller and validate we support it
-        controller = None
-        for a_controller in self.controllers.keys():
-            if a_controller in title:
-                controller = self.controllers[a_controller]
-        if not controller:
+        if 'X52' in title:
+            controller = X52()
+        elif 'Warthog' in title:
+            if 'Joystick' in title:
+                controller = WarthogStick()
+            elif 'Throttle' in title:
+                controller = WarthogThrottle()
+        else:
             raise Exception(
                 "Unknown controller: {}. Supported controllers: {}".format(title, ','.join(self.controllers.keys()))
             )
 
-        file_path = os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'img')
-        stick_image = Image.open(os.path.join(file_path, controller.stick_file))
-        throttle_image = Image.open(os.path.join(file_path, controller.throttle_file))
-        # initialise the drawing context with
-        # the image object as background
-        draw = {
-            'stick': ImageDraw.Draw(stick_image),
-            'throttle': ImageDraw.Draw(throttle_image),
-        }
+        if controller.render_stick:
+            stick_image = Renderer('stick', controller.stick_file).render(controls, controller)
+        else:
+            stick_image = None
+        if controller.render_throttle:
+            throttle_image = Renderer('throttle', controller.throttle_file).render(controls, controller)
+        else:
+            throttle_image = None
 
-        table = bs.find(soup, 'table')
-        switches = []
-        # iterate over possible controls
-        for row in table.find_all('tr'):
-            columns = row.find_all('td')
-            control_a = columns[0].text.replace('"', '').strip()
-            # iterate over each bind for the control
-            for control in control_a.split('; '):
-                # look for a switch
-                if not control or control in controller.ignore_mapping:
-                    continue
-                switched = False
-                if control.find(' - ') > 0:
-                    switch = control.split(' - ')[0]
-                    (x, y, size, hotas) = controller.lookup_position(switch, False)
-                    self.draw_text(draw[hotas], x, y, size, '(SWITCH)')
-                    control = control.split(' - ')[1]
-                    switches.append(switch)
-                    switched = True
-                try:
-                    (x, y, size, hotas) = controller.lookup_position(control, switched)
-                except Exception as e:
-                    print("unknown control - {} - {}".format(control, e))
-                    continue
-                try:
-                    the_draw = draw[hotas]
-                except KeyError:
-                    print("unknown stick type")
-                    continue
-                message = columns[1].text.replace('"', '').strip()
-                print(the_draw, x, y, size, message)
-                self.draw_text(the_draw, x, y, size, message)
-
-        # return the edited images (these are never written to disk)
-        stick_output = io.BytesIO()
-        throttle_output = io.BytesIO()
-        io.BytesIO(stick_image.save(stick_output, format='png', compress_level=9))
-        io.BytesIO(throttle_image.save(throttle_output, format='png', compress_level=9))
-
-        stick_output.seek(0)
         return render_template(
             'dcs/hotas.html',
-            joystick=base64.b64encode(stick_output.getvalue()).decode('utf-8'),
-            throttle=base64.b64encode(throttle_output.getvalue()).decode('utf-8'),
+            joystick=stick_image,
+            throttle=throttle_image,
         )
 
 
@@ -164,8 +183,6 @@ class X52:
             Clutch Fixed
         """
         self.name = 'x52'
-        self.stick_file = 'x52_stick.png'
-        self.throttle_file = 'x52_throttle.png'
         self.controller_type = 'hotas'
         self.ignore_mapping = {
             'JOY_Z',
@@ -176,6 +193,10 @@ class X52:
             'JOY_RX',
         }
         self.switches = []
+        self.stick_file = 'x52_stick.png'
+        self.throttle_file = 'x52_throttle.png'
+        self.render_stick = True
+        self.render_throttle = True
 
         self.switch_key = ''  # 'JOY_BTN6 - '
 
@@ -349,7 +370,7 @@ class X52:
             return self.position_mapping[control]
 
 
-class Warthog:
+class WarthogStick:
     def __init__(self):
         """
                 Mapping of buttons to actual buttons
@@ -379,29 +400,8 @@ class Warthog:
                     TRIGGER 2           JOY_BTN1
                     NSB                 JOY_BTN3
                     PINKIE
-                Throttle
-                    Coolie Switch Up    JOY_BTN_POV1_U
-                    Coolie Switch Down  JOY_BTN_POV1_D
-                    Coolie Switch Left  JOY_BTN_POV1_L
-                    Coolie Switch Right JOY_BTN_POV1_R
-                    Mic Switch FWD
-                    Mic Switch AFT
-                    Mic Switch LEFT
-                    Mic Switch RIGHT
-                    SPEEDBRAKE OUT
-                    SPEEDBRAKE IN
-                    Boat switch FWD
-                    Boat Switch AFT
-                    China Hat FWD       JOY_BTN11
-                    China Hat AFT
-                    Throttle Button     JOY_BTN15
-                    Pinkie Switch
-                    FLAPS UP            JOY_BTN22
-                    FLAPS DWN           JOY_BTN23
         """
-        self.name = 'warthog'
-        self.stick_file = 'warthog_stick.png'
-        self.throttle_file = 'warthog_throttle.png'
+        self.name = 'warthog_stick'
         self.controller_type = 'hotas'
         self.ignore_mapping = {
             'JOY_Z',
@@ -412,10 +412,11 @@ class Warthog:
             'JOY_RX',
         }
         self.switches = []
+        self.stick_file = 'warthog_stick.png'
+        self.render_stick = True
+        self.render_throttle = False
 
         self.switch_key = 'JOY_BTN3'  # 'JOY_BTN6 - '
-        self._joystick_ = []
-        self._throttle_ = []
 
         self.control_mapping = {
             # Joystick
@@ -463,6 +464,125 @@ class Warthog:
             self.switch_key + 'JOY_BTN3': 'nose_wheel_steering_s',
             '': 'r_pinkie_switch',
             self.switch_key + '': 'r_pinkie_switch_s',
+        }
+
+        self.position_mapping = {
+            # Joystick
+            'JOY_BTN7': (622, 542, SIZE_MEDIUM, 'stick'),  # TMS FWD
+            'JOY_BTN9': (622, 642, SIZE_MEDIUM, 'stick'),  # TMS AFT
+            'JOY_BTN10': (526, 593, SIZE_MEDIUM, 'stick'),  # TMS LEFT
+            'JOY_BTN8': (713, 593, SIZE_MEDIUM, 'stick'),  # TMS RIGHT
+            'JOY_BTN11': (1449, 885, SIZE_MEDIUM, 'stick'),  # DMS FWD
+            'JOY_BTN13': (1449, 986, SIZE_MEDIUM, 'stick'),  # DMS AFT
+            'JOY_BTN14': (1350, 937, SIZE_MEDIUM, 'stick'),  # DMS LEFT
+            'JOY_BTN12': (1538, 937, SIZE_MEDIUM, 'stick'),  # DMS RIGHT
+            'JOY_BTN_POV1_D': (1388, 237, SIZE_MEDIUM, 'stick'),  # TRIM DOWN
+            'JOY_BTN_POV1_U': (1391, 342, SIZE_MEDIUM, 'stick'),  # TRIM UP
+            'JOY_BTN_POV1_L': (1290, 287, SIZE_MEDIUM, 'stick'),  # TRIM LEFT
+            'JOY_BTN_POV1_R': (1478, 287, SIZE_MEDIUM, 'stick'),  # TRIM RIGHT
+            'JOY_BTN15': (627, 905, SIZE_MEDIUM, 'stick'),  # CMS FWD
+            'JOY_BTN17': (627, 1007, SIZE_MEDIUM, 'stick'),  # CMS AFT
+            'JOY_BTN18': (531, 957, SIZE_MEDIUM, 'stick'),  # CMS LEFT
+            'JOY_BTN16': (718, 957, SIZE_MEDIUM, 'stick'),  # CMS RIGHT
+            '': (0, 0, SIZE_MEDIUM, 'stick'),  # CMS DOWN
+            'JOY_BTN5': (1524, 439, SIZE_MEDIUM, 'stick'),  # MASTER MODE
+            'JOY_BTN2': (975, 208, SIZE_MEDIUM, 'stick'),  # WEAPON RELEASE
+            'JOY_BTN1': (0, 0, SIZE_MEDIUM, 'stick'),  # WEAPON FIRE
+            'JOY_BTN3': (510, 1225, SIZE_MEDIUM, 'stick'),  # NOSE WHEEL STEERING
+            '': (510, 1158, SIZE_MEDIUM, 'stick'),  # PINKIE SWITCH
+        }
+
+        self.switched_mapping = {
+            # Joystick
+            'JOY_BTN7': (0, 0, SIZE_LARGE, 'stick'),  # TMS FWD
+            'JOY_BTN9': (0, 0, SIZE_LARGE, 'stick'),  # TMS AFT
+            'JOY_BTN10': (0, 0, SIZE_LARGE, 'stick'),  # TMS LEFT
+            'JOY_BTN8': (0, 0, SIZE_LARGE, 'stick'),  # TMS RIGHT
+            'JOY_BTN11': (0, 0, SIZE_LARGE, 'stick'),  # DMS FWD
+            'JOY_BTN13': (0, 0, SIZE_LARGE, 'stick'),  # DMS AFT
+            'JOY_BTN14': (0, 0, SIZE_LARGE, 'stick'),  # DMS LEFT
+            'JOY_BTN12': (0, 0, SIZE_LARGE, 'stick'),  # DMS RIGHT
+            'JOY_BTN_POV1_D': (0, 0, SIZE_LARGE, 'stick'),  # TRIM DOWN
+            'JOY_BTN_POV1_U': (0, 0, SIZE_LARGE, 'stick'),  # TRIM UP
+            'JOY_BTN_POV1_L': (0, 0, SIZE_LARGE, 'stick'),  # TRIM LEFT
+            'JOY_BTN_POV1_R': (0, 0, SIZE_LARGE, 'stick'),  # TRIM RIGHT
+            'JOY_BTN15': (0, 0, SIZE_LARGE, 'stick'),  # CMS FWD
+            'JOY_BTN17': (0, 0, SIZE_LARGE, 'stick'),  # CMS AFT
+            'JOY_BTN18': (0, 0, SIZE_LARGE, 'stick'),  # CMS LEFT
+            'JOY_BTN16': (0, 0, SIZE_LARGE, 'stick'),  # CMS RIGHT
+            '': (0, 0, SIZE_LARGE, 'stick'),  # CMS DOWN
+            'JOY_BTN5': (0, 0, SIZE_LARGE, 'stick'),  # MASTER MODE
+            'JOY_BTN2': (0, 0, SIZE_LARGE, 'stick'),  # WEAPON RELEASE
+            'JOY_BTN1': (0, 0, SIZE_LARGE, 'stick'),  # WEAPON FIRE
+            'JOY_BTN3': (0, 0, SIZE_LARGE, 'stick'),  # NOSE WHEEL STEERING
+            '': (0, 0, SIZE_LARGE, 'stick'),  # PINKIE SWITCH
+        }
+
+    def add_switch(self, control):
+        if control not in self.control_mapping:
+            raise Exception("Unknown switch detected - {}".format(control))
+        self.switches.append(control)
+
+    def lookup_control(self, control):
+        if not control:
+            return None, None
+        try:
+            return self.control_mapping[control], False
+        except KeyError:
+            try:
+                return self.control_mapping[control], True
+            except KeyError:
+                return None, None
+
+    def lookup_position(self, control, switched):
+        if switched:
+            return self.switched_mapping[control]
+        else:
+            return self.position_mapping[control]
+
+
+class WarthogThrottle:
+    def __init__(self):
+        """
+                Mapping of buttons to actual buttons
+                Throttle
+                    Coolie Switch Up    JOY_BTN_POV1_U
+                    Coolie Switch Down  JOY_BTN_POV1_D
+                    Coolie Switch Left  JOY_BTN_POV1_L
+                    Coolie Switch Right JOY_BTN_POV1_R
+                    Mic Switch FWD
+                    Mic Switch AFT
+                    Mic Switch LEFT
+                    Mic Switch RIGHT
+                    SPEEDBRAKE OUT
+                    SPEEDBRAKE IN
+                    Boat switch FWD
+                    Boat Switch AFT
+                    China Hat FWD       JOY_BTN11
+                    China Hat AFT
+                    Throttle Button     JOY_BTN15
+                    Pinkie Switch
+                    FLAPS UP            JOY_BTN22
+                    FLAPS DWN           JOY_BTN23
+        """
+        self.name = 'warthog_throttle'
+        self.controller_type = 'hotas'
+        self.ignore_mapping = {
+            'JOY_Z',
+            'JOY_Y',
+            'JOY_X',
+            'JOY_RZ',
+            'JOY_RY',
+            'JOY_RX',
+        }
+        self.switches = []
+        self.throttle_file = 'warthog_throttle.png'
+        self.render_stick = False
+        self.render_throttle = True
+
+        self.switch_key = 'JOY_BTN3'  # 'JOY_BTN6 - '
+
+        self.control_mapping = {
             # Throttle
             'JOY_BTN_POV1_U': 'coolie_switch_up',
             self.switch_key + '': 'coolie_switch_up_s',
@@ -503,29 +623,6 @@ class Warthog:
         }
 
         self.position_mapping = {
-            # Joystick
-            'JOY_BTN7': (622, 542, SIZE_NORMAL, 'stick'),  # TMS FWD
-            'JOY_BTN9': (622, 642, SIZE_NORMAL, 'stick'),  # TMS AFT
-            'JOY_BTN10': (526, 593, SIZE_NORMAL, 'stick'),  # TMS LEFT
-            'JOY_BTN8': (713, 593, SIZE_NORMAL, 'stick'),  # TMS RIGHT
-            'JOY_BTN11': (1449, 885, SIZE_NORMAL, 'stick'),  # DMS FWD
-            'JOY_BTN13': (1449, 986, SIZE_NORMAL, 'stick'),  # DMS AFT
-            'JOY_BTN14': (1350, 937, SIZE_NORMAL, 'stick'),  # DMS LEFT
-            'JOY_BTN12': (1538, 937, SIZE_NORMAL, 'stick'),  # DMS RIGHT
-            'JOY_BTN_POV1_D': (1388, 237, SIZE_NORMAL, 'stick'),  # TRIM DOWN
-            'JOY_BTN_POV1_U': (1391, 342, SIZE_NORMAL, 'stick'),  # TRIM UP
-            'JOY_BTN_POV1_L': (1290, 287, SIZE_NORMAL, 'stick'),  # TRIM LEFT
-            'JOY_BTN_POV1_R': (1478, 287, SIZE_NORMAL, 'stick'),  # TRIM RIGHT
-            'JOY_BTN15': (627, 905, SIZE_NORMAL, 'stick'),  # CMS FWD
-            'JOY_BTN17': (627, 1007, SIZE_NORMAL, 'stick'),  # CMS AFT
-            'JOY_BTN18': (531, 957, SIZE_NORMAL, 'stick'),  # CMS LEFT
-            'JOY_BTN16': (718, 957, SIZE_NORMAL, 'stick'),  # CMS RIGHT
-            '': (0, 0, SIZE_NORMAL, 'stick'),  # CMS DOWN
-            'JOY_BTN5': (1524, 439, SIZE_NORMAL, 'stick'),  # MASTER MODE
-            'JOY_BTN2': (975, 208, SIZE_NORMAL, 'stick'),  # WEAPON RELEASE
-            'JOY_BTN1': (0, 0, SIZE_NORMAL, 'stick'),  # WEAPON FIRE
-            'JOY_BTN3': (510, 1225, SIZE_NORMAL, 'stick'),  # NOSE WHEEL STEERING
-            '': (510, 1158, SIZE_NORMAL, 'stick'),  # PINKIE SWITCH
             # Throttle
             'JOY_BTN_POV1_U': (893, 220, SIZE_NORMAL, 'throttle'),  # Coolie Switch Up
             'JOY_BTN_POV1_D': (893, 321, SIZE_NORMAL, 'throttle'),  # Coolie Switch Down
@@ -548,29 +645,6 @@ class Warthog:
         }
 
         self.switched_mapping = {
-            # Joystick
-            'JOY_BTN7': (0, 0, SIZE_LARGE, 'stick'),  # TMS FWD
-            'JOY_BTN9': (0, 0, SIZE_LARGE, 'stick'),  # TMS AFT
-            'JOY_BTN10': (0, 0, SIZE_LARGE, 'stick'),  # TMS LEFT
-            'JOY_BTN8': (0, 0, SIZE_LARGE, 'stick'),  # TMS RIGHT
-            'JOY_BTN11': (0, 0, SIZE_LARGE, 'stick'),  # DMS FWD
-            'JOY_BTN13': (0, 0, SIZE_LARGE, 'stick'),  # DMS AFT
-            'JOY_BTN14': (0, 0, SIZE_LARGE, 'stick'),  # DMS LEFT
-            'JOY_BTN12': (0, 0, SIZE_LARGE, 'stick'),  # DMS RIGHT
-            'JOY_BTN_POV1_D': (0, 0, SIZE_LARGE, 'stick'),  # TRIM DOWN
-            'JOY_BTN_POV1_U': (0, 0, SIZE_LARGE, 'stick'),  # TRIM UP
-            'JOY_BTN_POV1_L': (0, 0, SIZE_LARGE, 'stick'),  # TRIM LEFT
-            'JOY_BTN_POV1_R': (0, 0, SIZE_LARGE, 'stick'),  # TRIM RIGHT
-            'JOY_BTN15': (0, 0, SIZE_LARGE, 'stick'),  # CMS FWD
-            'JOY_BTN17': (0, 0, SIZE_LARGE, 'stick'),  # CMS AFT
-            'JOY_BTN18': (0, 0, SIZE_LARGE, 'stick'),  # CMS LEFT
-            'JOY_BTN16': (0, 0, SIZE_LARGE, 'stick'),  # CMS RIGHT
-            '': (0, 0, SIZE_LARGE, 'stick'),  # CMS DOWN
-            'JOY_BTN5': (0, 0, SIZE_LARGE, 'stick'),  # MASTER MODE
-            'JOY_BTN2': (0, 0, SIZE_LARGE, 'stick'),  # WEAPON RELEASE
-            'JOY_BTN1': (0, 0, SIZE_LARGE, 'stick'),  # WEAPON FIRE
-            'JOY_BTN3': (0, 0, SIZE_LARGE, 'stick'),  # NOSE WHEEL STEERING
-            '': (0, 0, SIZE_LARGE, 'stick'),  # PINKIE SWITCH
             # Throttle
             'JOY_BTN_POV1_U': (0, 0, SIZE_LARGE, 'throttle'),  # Coolie Switch Up
             'JOY_BTN_POV1_D': (0, 0, SIZE_LARGE, 'throttle'),  # Coolie Switch Down

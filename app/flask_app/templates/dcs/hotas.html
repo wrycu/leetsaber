@@ -1,3 +1,4 @@
+{% if joystick %}
 <div class="ui card">
     <div class="image">
         <img src="data:image/png;base64,{{ joystick|safe }}" alt="stick" id="stick_data">
@@ -8,7 +9,7 @@
             <i class="save icon"></i>
         </a>
     </div>
-</div>|<div class="ui card">
+</div>{% endif %}|{% if throttle %}<div class="ui card">
     <div class="image">
         <img src="data:image/png;base64,{{ throttle|safe }}" alt="stick" id="throttle_data">
     </div>
@@ -18,4 +19,4 @@
             <i class="save icon"></i>
         </a>
     </div>
-</div>
+</div>{% endif %}
