@@ -11,6 +11,7 @@ SIZE_LARGE = 45
 SIZE_NORMAL = 30
 SIZE_MEDIUM = 20
 SIZE_SMALL = 16
+SIZE_STANDARD_NORMAL = 27
 
 
 class Renderer:
@@ -396,10 +397,11 @@ class WarthogStick:
                     CMS DOWN
                     MASTER MODE         JOY_BTN5
                     WEAPON RELEASE      JOY_BTN2
-                    TRIGGER
-                    TRIGGER 2           JOY_BTN1
+                    TRIGGER             JOY_BTN1
+                    TRIGGER 2           JOY_BTN6
                     NSB                 JOY_BTN3
-                    PINKIE
+                    PINKIE              JOY_BTN4
+
         """
         self.name = 'warthog_stick'
         self.controller_type = 'hotas'
@@ -460,10 +462,12 @@ class WarthogStick:
             self.switch_key + 'JOY_BTN2': 'weapon_release_s',
             'JOY_BTN1': 'weapon_fire',
             self.switch_key + 'JOY_BTN1': 'weapon_fire_s',
+            'JOY_BTN6': 'weapon_fire_2',
+            self.switch_key + 'JOY_BTN6': 'weapon_fire_2_s',
             'JOY_BTN3': 'nose_wheel_steering',
             self.switch_key + 'JOY_BTN3': 'nose_wheel_steering_s',
-            '': 'r_pinkie_switch',
-            self.switch_key + '': 'r_pinkie_switch_s',
+            'JOY_BTN4': 'r_pinkie_switch',
+            self.switch_key + 'JOY_BTN4': 'r_pinkie_switch_s',
         }
 
         self.position_mapping = {
@@ -487,35 +491,37 @@ class WarthogStick:
             '': (0, 0, SIZE_MEDIUM, 'stick'),  # CMS DOWN
             'JOY_BTN5': (1524, 439, SIZE_MEDIUM, 'stick'),  # MASTER MODE
             'JOY_BTN2': (975, 208, SIZE_MEDIUM, 'stick'),  # WEAPON RELEASE
-            'JOY_BTN1': (0, 0, SIZE_MEDIUM, 'stick'),  # WEAPON FIRE
+            'JOY_BTN1': (126, 659, SIZE_MEDIUM, 'stick'),  # WEAPON FIRE
+            'JOY_BTN6': (126, 727, SIZE_MEDIUM, 'stick'),  # WEAPON FIRE 2
             'JOY_BTN3': (510, 1225, SIZE_MEDIUM, 'stick'),  # NOSE WHEEL STEERING
-            '': (510, 1158, SIZE_MEDIUM, 'stick'),  # PINKIE SWITCH
+            'JOY_BTN4': (510, 1158, SIZE_MEDIUM, 'stick'),  # PINKIE SWITCH
         }
 
         self.switched_mapping = {
             # Joystick
-            'JOY_BTN7': (0, 0, SIZE_LARGE, 'stick'),  # TMS FWD
-            'JOY_BTN9': (0, 0, SIZE_LARGE, 'stick'),  # TMS AFT
-            'JOY_BTN10': (0, 0, SIZE_LARGE, 'stick'),  # TMS LEFT
-            'JOY_BTN8': (0, 0, SIZE_LARGE, 'stick'),  # TMS RIGHT
-            'JOY_BTN11': (0, 0, SIZE_LARGE, 'stick'),  # DMS FWD
-            'JOY_BTN13': (0, 0, SIZE_LARGE, 'stick'),  # DMS AFT
-            'JOY_BTN14': (0, 0, SIZE_LARGE, 'stick'),  # DMS LEFT
-            'JOY_BTN12': (0, 0, SIZE_LARGE, 'stick'),  # DMS RIGHT
-            'JOY_BTN_POV1_D': (0, 0, SIZE_LARGE, 'stick'),  # TRIM DOWN
-            'JOY_BTN_POV1_U': (0, 0, SIZE_LARGE, 'stick'),  # TRIM UP
-            'JOY_BTN_POV1_L': (0, 0, SIZE_LARGE, 'stick'),  # TRIM LEFT
-            'JOY_BTN_POV1_R': (0, 0, SIZE_LARGE, 'stick'),  # TRIM RIGHT
-            'JOY_BTN15': (0, 0, SIZE_LARGE, 'stick'),  # CMS FWD
-            'JOY_BTN17': (0, 0, SIZE_LARGE, 'stick'),  # CMS AFT
-            'JOY_BTN18': (0, 0, SIZE_LARGE, 'stick'),  # CMS LEFT
-            'JOY_BTN16': (0, 0, SIZE_LARGE, 'stick'),  # CMS RIGHT
+            'JOY_BTN7': (622, 542, SIZE_LARGE, 'stick'),  # TMS FWD
+            'JOY_BTN9': (622, 542, SIZE_LARGE, 'stick'),  # TMS AFT
+            'JOY_BTN10': (526, 593, SIZE_LARGE, 'stick'),  # TMS LEFT
+            'JOY_BTN8': (713, 593, SIZE_LARGE, 'stick'),  # TMS RIGHT
+            'JOY_BTN11': (1449, 885, SIZE_LARGE, 'stick'),  # DMS FWD
+            'JOY_BTN13': (1449, 986, SIZE_LARGE, 'stick'),  # DMS AFT
+            'JOY_BTN14': (1350, 937, SIZE_LARGE, 'stick'),  # DMS LEFT
+            'JOY_BTN12': (1538, 937, SIZE_LARGE, 'stick'),  # DMS RIGHT
+            'JOY_BTN_POV1_D': (1388, 237, SIZE_LARGE, 'stick'),  # TRIM DOWN
+            'JOY_BTN_POV1_U': (1391, 342, SIZE_LARGE, 'stick'),  # TRIM UP
+            'JOY_BTN_POV1_L': (1290, 287, SIZE_LARGE, 'stick'),  # TRIM LEFT
+            'JOY_BTN_POV1_R': (718, 287, SIZE_LARGE, 'stick'),  # TRIM RIGHT
+            'JOY_BTN15': (627, 905, SIZE_LARGE, 'stick'),  # CMS FWD
+            'JOY_BTN17': (627, 1007, SIZE_LARGE, 'stick'),  # CMS AFT
+            'JOY_BTN18': (531, 957, SIZE_LARGE, 'stick'),  # CMS LEFT
+            'JOY_BTN16': (718, 957, SIZE_LARGE, 'stick'),  # CMS RIGHT
             '': (0, 0, SIZE_LARGE, 'stick'),  # CMS DOWN
-            'JOY_BTN5': (0, 0, SIZE_LARGE, 'stick'),  # MASTER MODE
-            'JOY_BTN2': (0, 0, SIZE_LARGE, 'stick'),  # WEAPON RELEASE
-            'JOY_BTN1': (0, 0, SIZE_LARGE, 'stick'),  # WEAPON FIRE
-            'JOY_BTN3': (0, 0, SIZE_LARGE, 'stick'),  # NOSE WHEEL STEERING
-            '': (0, 0, SIZE_LARGE, 'stick'),  # PINKIE SWITCH
+            'JOY_BTN5': (1524, 439, SIZE_LARGE, 'stick'),  # MASTER MODE
+            'JOY_BTN2': (975, 208, SIZE_LARGE, 'stick'),  # WEAPON RELEASE
+            'JOY_BTN1': (312, 659, SIZE_LARGE, 'stick'),  # WEAPON FIRE
+            'JOY_BTN6': (312, 727, SIZE_LARGE, 'stick'),  # WEAPON FIRE 2
+            'JOY_BTN3': (510, 1225, SIZE_LARGE, 'stick'),  # NOSE WHEEL STEERING
+            'JOY_BTN4': (510, 1158, SIZE_LARGE, 'stick'),  # PINKIE SWITCH
         }
 
     def add_switch(self, control):
@@ -545,25 +551,39 @@ class WarthogThrottle:
     def __init__(self):
         """
                 Mapping of buttons to actual buttons
-                Throttle
-                    Coolie Switch Up    JOY_BTN_POV1_U
-                    Coolie Switch Down  JOY_BTN_POV1_D
-                    Coolie Switch Left  JOY_BTN_POV1_L
-                    Coolie Switch Right JOY_BTN_POV1_R
-                    Mic Switch FWD
-                    Mic Switch AFT
-                    Mic Switch LEFT
-                    Mic Switch RIGHT
-                    SPEEDBRAKE OUT
-                    SPEEDBRAKE IN
-                    Boat switch FWD
-                    Boat Switch AFT
-                    China Hat FWD       JOY_BTN11
-                    China Hat AFT
-                    Throttle Button     JOY_BTN15
-                    Pinkie Switch
-                    FLAPS UP            JOY_BTN22
-                    FLAPS DWN           JOY_BTN23
+                Coolie Switch Up    JOY_BTN_POV1_U
+                Coolie Switch Down  JOY_BTN_POV1_D
+                Coolie Switch Left  JOY_BTN_POV1_L
+                Coolie Switch Right JOY_BTN_POV1_R
+                Mic Switch FWD      JOY_BTN4
+                Mic Switch AFT      JOY_BTN6
+                Mic Switch LEFT     JOY_BTN3
+                Mic Switch RIGHT    JOY_BTN5
+                SPEEDBRAKE OUT      JOY_BTN7
+                SPEEDBRAKE IN       JOY_BTN8
+                Boat switch FWD     JOY_BTN9
+                Boat Switch AFT     JOY_BTN10
+                China Hat FWD       JOY_BTN11
+                China Hat AFT       JOY_BTN12
+                Throttle Button     JOY_BTN15
+                Pinkie Switch FWD   JOY_BTN13
+                Pinkie Swift AFT    JOY_BTN14
+                FLAPS UP            JOY_BTN22
+                FLAPS DWN           JOY_BTN23
+
+                EAC                 JOY_BTN24
+                RDR ALTM            JOY_BTN25
+                AP                  JOY_BTN26
+                LASTE / PATH        JOY_BTN27
+                LASTE / ALT         JOY_BTN28
+                L/G WRN             JOY_BTN21
+                flaps up            JOY_BTN22
+                flaps down          JOY_BTN23
+                APU start           JOY_BTN20
+                IGN L               JOY_BTN18
+                IGN R               JOY_BTN19
+                ENG FLOW L          JOY_BTN16
+                ENG FLOW R          JOY_BTN17
         """
         self.name = 'warthog_throttle'
         self.controller_type = 'hotas'
@@ -592,79 +612,148 @@ class WarthogThrottle:
             self.switch_key + '': 'coolie_switch_left_s',
             'JOY_BTN_POV1_R': 'coolie_switch_right',
             self.switch_key + '': 'coolie_switch_right_s',
-            '': 'mic_switch_fwd',
-            self.switch_key + '': 'mic_switch_fwd_s',
-            '': 'mic_switch_aft',
-            self.switch_key + '': 'mic_switch_aft_s',
-            '': 'mic_switch_left',
-            self.switch_key + '': 'mic_switch_left_s',
-            '': 'mic_switch_right',
-            self.switch_key + '': 'mic_switch_right_s',
-            '': 'speedbrake_out',
-            self.switch_key + '': 'speedbrake_out_s',
-            '': 'speedbrake_in',
-            self.switch_key + '': 'speedbrake_in_s',
-            '': 'boat_switch_fwd',
-            self.switch_key + '': 'boat_switch_fwd_s',
-            '': 'boat_switch_aft',
-            self.switch_key + '': 'boat_switch_aft_s',
+            'JOY_BTN4': 'mic_switch_fwd',
+            self.switch_key + 'JOY_BTN4': 'mic_switch_fwd_s',
+            'JOY_BTN6': 'mic_switch_aft',
+            self.switch_key + 'JOY_BTN6': 'mic_switch_aft_s',
+            'JOY_BTN3': 'mic_switch_left',
+            self.switch_key + 'JOY_BTN3': 'mic_switch_left_s',
+            'JOY_BTN5': 'mic_switch_right',
+            self.switch_key + 'JOY_BTN5': 'mic_switch_right_s',
+            'JOY_BTN7': 'speedbrake_out',
+            self.switch_key + 'JOY_BTN7': 'speedbrake_out_s',
+            'JOY_BTN8': 'speedbrake_in',
+            self.switch_key + 'JOY_BTN8': 'speedbrake_in_s',
+            'JOY_BTN9': 'boat_switch_fwd',
+            self.switch_key + 'JOY_BTN9': 'boat_switch_fwd_s',
+            'JOY_BTN10': 'boat_switch_aft',
+            self.switch_key + 'JOY_BTN10': 'boat_switch_aft_s',
             'JOY_BTN11': 'china_hat_fwd',
             self.switch_key + 'JOY_BTN11': 'china_hat_fwd_s',
-            '': 'china_hat_aft',
-            self.switch_key + '': 'china_hat_aft_s',
+            'JOY_BTN12': 'china_hat_aft',
+            self.switch_key + 'JOY_BTN12': 'china_hat_aft_s',
             'JOY_BTN15': 'throttle_button',
             self.switch_key + 'JOY_BTN15': 'throttle_button_s',
-            '': 'l_pinkie_switch',
-            self.switch_key + 'l_pinkie_switch': 'l_pinkie_switch_s',
+            'JOY_BTN13': 'l_pinkie_switch_fwd',
+            self.switch_key + 'JOY_BTN13': 'l_pinkie_switch_fwd_s',
+            'JOY_BTN14': 'l_pinkie_switch_aft',
+            self.switch_key + 'JOY_BTN14': 'l_pinkie_switch_aft_s',
             'JOY_BTN22': 'flaps_up',
             self.switch_key + 'JOY_BTN22': 'flaps_up_s',
             'JOY_BTN23': 'flaps_down',
             self.switch_key + 'JOY_BTN23': 'flaps_down_s',
+            # recent additions
+            'JOY_BTN24': 'eac',
+            self.switch_key + 'JOY_BTN24': 'eac_s',
+            'JOY_BTN25': 'rdr_alt',
+            self.switch_key + 'JOY_BTN25': 'rdr_alt_s',
+            'JOY_BTN26': 'ap',
+            self.switch_key + 'JOY_BTN26': 'ap_s',
+            'JOY_BTN27': 'laste_path',
+            self.switch_key + 'JOY_BTN27': 'laste_path_s',
+            'JOY_BTN28': 'laste_alt',
+            self.switch_key + 'JOY_BTN28': 'laste_alt_s',
+            'JOY_BTN21': 'lg_warn',
+            self.switch_key + 'JOY_BTN21': 'lg_warn_s',
+            'JOY_BTN20': 'apu',
+            self.switch_key + 'JOY_BTN20': 'apu_s',
+            'JOY_BTN18': 'ign_l',
+            self.switch_key + 'JOY_BTN18': 'ign_l_s',
+            'JOY_BTN19': 'ign_r',
+            self.switch_key + 'JOY_BTN19': 'ign_r_s',
+            'JOY_BTN16': 'eng_l',
+            self.switch_key + 'JOY_BTN16': 'eng_l_s',
+            'JOY_BTN17': 'eng_r',
+            self.switch_key + 'JOY_BTN17': 'eng_r_s',
         }
 
         self.position_mapping = {
             # Throttle
-            'JOY_BTN_POV1_U': (893, 220, SIZE_NORMAL, 'throttle'),  # Coolie Switch Up
-            'JOY_BTN_POV1_D': (893, 321, SIZE_NORMAL, 'throttle'),  # Coolie Switch Down
-            'JOY_BTN_POV1_L': (798, 272, SIZE_NORMAL, 'throttle'),  # Coolie Switch Left
-            'JOY_BTN_POV1_R': (983, 272, SIZE_NORMAL, 'throttle'),  # Coolie Switch Right
-            '': (648, 589, SIZE_NORMAL, 'throttle'),  # Mic Switch FWD
-            '': (648, 687, SIZE_NORMAL, 'throttle'),  # Mic Switch AFT
-            '': (549, 641, SIZE_NORMAL, 'throttle'),  # Mic Switch LEFT
-            '': (737, 641, SIZE_NORMAL, 'throttle'),  # Mic Switch RIGHT
-            '': (0, 0, SIZE_NORMAL, 'throttle'),  # Speed brake out
-            '': (0, 0, SIZE_NORMAL, 'throttle'),  # Speed brake in
-            '': (17, 947, SIZE_NORMAL, 'throttle'),  # Boat Switch FWD
-            '': (376, 947, SIZE_NORMAL, 'throttle'),  # Boat Switch AFT
-            'JOY_BTN11': (15, 1075, SIZE_NORMAL, 'throttle'),  # China Hat FWD
-            '': (378, 1075, SIZE_NORMAL, 'throttle'),  # China Hat AFT
-            'JOY_BTN15': (54, 695, SIZE_NORMAL, 'throttle'),  # Throttle Button
-            '': (0, 0, SIZE_NORMAL, 'throttle'),  # Pinkie Switch
-            'JOY_BTN22': (0, 0, SIZE_NORMAL, 'throttle'),  # Flaps Up
-            'JOY_BTN23': (0, 0, SIZE_NORMAL, 'throttle'),  # Flaps Down
+            'JOY_BTN_POV1_U': (858, 23, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Up
+            'JOY_BTN_POV1_D': (858, 161, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Down
+            'JOY_BTN_POV1_L': (758, 95, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Left
+            'JOY_BTN_POV1_R': (979, 95, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Right
+            'JOY_BTN4': (147, 281, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch FWD
+            'JOY_BTN6': (147, 426, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch AFT
+            'JOY_BTN3': (48, 354, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch LEFT
+            'JOY_BTN5': (274, 353, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch RIGHT
+            'JOY_BTN7': (36, 604, SIZE_STANDARD_NORMAL, 'throttle'),  # Speed brake out
+            'JOY_BTN8': (258, 602, SIZE_STANDARD_NORMAL, 'throttle'),  # Speed brake in
+            'JOY_BTN9': (36, 825, SIZE_STANDARD_NORMAL, 'throttle'),  # Boat Switch FWD
+            'JOY_BTN10': (259, 825, SIZE_STANDARD_NORMAL, 'throttle'),  # Boat Switch AFT
+            'JOY_BTN11': (545, 1102, SIZE_STANDARD_NORMAL, 'throttle'),  # China Hat FWD
+            'JOY_BTN12': (769, 1102, SIZE_STANDARD_NORMAL, 'throttle'),  # China Hat AFT
+            'JOY_BTN15': (2071, 364, SIZE_STANDARD_NORMAL, 'throttle'),  # Throttle Button
+            'JOY_BTN13': (2074, 656, SIZE_STANDARD_NORMAL, 'throttle'),  # Pinkie Switch FWD
+            'JOY_BTN14': (2289, 656, SIZE_STANDARD_NORMAL, 'throttle'),  # Pinkie Switch AFT
+            'JOY_BTN22': (35, 1051, SIZE_STANDARD_NORMAL, 'throttle'),  # Flaps Up
+            'JOY_BTN23': (260, 1051, SIZE_STANDARD_NORMAL, 'throttle'),  # Flaps Down
+            'JOY_BTN24': (39, 1280, SIZE_STANDARD_NORMAL, 'throttle'),  # EAC
+            'JOY_BTN25': (549, 1284, SIZE_STANDARD_NORMAL, 'throttle'),  # RDR ALT
+            'JOY_BTN26': (1010, 1284, SIZE_STANDARD_NORMAL, 'throttle'),  # AP
+            'JOY_BTN27': (1601, 1185, SIZE_STANDARD_NORMAL, 'throttle'),  # LASTE / PATH
+            'JOY_BTN28': (1601, 1285, SIZE_STANDARD_NORMAL, 'throttle'),  # LASTE / ALT
+            'JOY_BTN21': (1601, 1083, SIZE_STANDARD_NORMAL, 'throttle'),  # L/G WARN
+            'JOY_BTN20': (2070, 1288, SIZE_STANDARD_NORMAL, 'throttle'),  # APU
+            'JOY_BTN18': (2070, 917, SIZE_STANDARD_NORMAL, 'throttle'),  # IGN L
+            'JOY_BTN19': (2290, 917, SIZE_STANDARD_NORMAL, 'throttle'),  # IGN R
+            'JOY_BTN16': (2067, 1119, SIZE_STANDARD_NORMAL, 'throttle'),  # ENG FLOW L
+            'JOY_BTN17': (2289, 1119, SIZE_STANDARD_NORMAL, 'throttle'),  # ENG FLOW R
         }
 
         self.switched_mapping = {
             # Throttle
-            'JOY_BTN_POV1_U': (0, 0, SIZE_LARGE, 'throttle'),  # Coolie Switch Up
-            'JOY_BTN_POV1_D': (0, 0, SIZE_LARGE, 'throttle'),  # Coolie Switch Down
-            'JOY_BTN_POV1_L': (0, 0, SIZE_LARGE, 'throttle'),  # Coolie Switch Left
-            'JOY_BTN_POV1_R': (0, 0, SIZE_LARGE, 'throttle'),  # Coolie Switch Right
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Mic Switch FWD
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Mic Switch AFT
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Mic Switch LEFT
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Mic Switch RIGHT
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Speed brake out
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Speed brake in
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Boat Switch FWD
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Boat Switch AFT
-            'JOY_BTN11': (0, 0, SIZE_LARGE, 'throttle'),  # China Hat FWD
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # China Hat AFT
-            'JOY_BTN15': (0, 0, SIZE_LARGE, 'throttle'),  # Throttle Button
-            '': (0, 0, SIZE_LARGE, 'throttle'),  # Pinkie Switch
-            'JOY_BTN22': (0, 0, SIZE_LARGE, 'throttle'),  # Flaps Up
-            'JOY_BTN23': (0, 0, SIZE_LARGE, 'throttle'),  # Flaps Down
+            'JOY_BTN_POV1_U': (1320, 23, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Up
+            'JOY_BTN_POV1_D': (1320, 161, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Down
+            'JOY_BTN_POV1_L': (1219, 95, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Left
+            'JOY_BTN_POV1_R': (1438, 95, SIZE_STANDARD_NORMAL, 'throttle'),  # Coolie Switch Right
+            'JOY_BTN4': (610, 283, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch FWD
+            'JOY_BTN6': (610, 423, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch AFT
+            'JOY_BTN3': (509, 351, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch LEFT
+            'JOY_BTN5': (730, 351, SIZE_STANDARD_NORMAL, 'throttle'),  # Mic Switch RIGHT
+            'JOY_BTN7': (42, 671, SIZE_STANDARD_NORMAL, 'throttle'),  # Speed brake out
+            'JOY_BTN8': (262, 671, SIZE_STANDARD_NORMAL, 'throttle'),  # Speed brake in
+            'JOY_BTN9': (42, 899, SIZE_STANDARD_NORMAL, 'throttle'),  # Boat Switch FWD
+            'JOY_BTN10': (260, 899, SIZE_STANDARD_NORMAL, 'throttle'),  # Boat Switch AFT
+            'JOY_BTN11': (545, 1175, SIZE_STANDARD_NORMAL, 'throttle'),  # China Hat FWD
+            'JOY_BTN12': (769, 1175, SIZE_STANDARD_NORMAL, 'throttle'),  # China Hat AFT
+            'JOY_BTN15': (2288, 365, SIZE_STANDARD_NORMAL, 'throttle'),  # Throttle Button
+            'JOY_BTN13': (2071, 731, SIZE_STANDARD_NORMAL, 'throttle'),  # Pinkie Switch FWD
+            'JOY_BTN14': (2290, 731, SIZE_STANDARD_NORMAL, 'throttle'),  # Pinkie Switch AFT
+            'JOY_BTN22': (39, 1126, SIZE_STANDARD_NORMAL, 'throttle'),  # Flaps Up
+            'JOY_BTN23': (260, 1126, SIZE_STANDARD_NORMAL, 'throttle'),  # Flaps Down
+            'JOY_BTN24': (260, 1284, SIZE_STANDARD_NORMAL, 'throttle'),  # EAC
+            'JOY_BTN25': (772, 1285, SIZE_STANDARD_NORMAL, 'throttle'),  # RDR ALT
+            'JOY_BTN26': (1236, 1284, SIZE_STANDARD_NORMAL, 'throttle'),  # AP
+            'JOY_BTN27': (1819, 1186, SIZE_STANDARD_NORMAL, 'throttle'),  # LASTE / PATH
+            'JOY_BTN28': (1819, 1286, SIZE_STANDARD_NORMAL, 'throttle'),  # LASTE / ALT
+            'JOY_BTN21': (1818, 1084, SIZE_STANDARD_NORMAL, 'throttle'),  # L/G WARN
+            'JOY_BTN20': (2295, 1285, SIZE_STANDARD_NORMAL, 'throttle'),  # APU
+            'JOY_BTN18': (2072, 985, SIZE_STANDARD_NORMAL, 'throttle'),  # IGN L
+            'JOY_BTN19': (2290, 985, SIZE_STANDARD_NORMAL, 'throttle'),  # IGN R
+            'JOY_BTN16': (2072, 1184, SIZE_STANDARD_NORMAL, 'throttle'),  # ENG FLOW L
+            'JOY_BTN17': (2292, 1184, SIZE_STANDARD_NORMAL, 'throttle'),  # ENG FLOW R
         }
+
+    def add_control(self, friendly_name, technical_name, x, y, size, location):
+        """
+        :param friendly_name:
+            e.g. 'Boat Switch FWD'
+        :param technical_name:
+            e.g. 'JOY_BTN9'
+        :param x:
+            e.g. 42
+        :param y:
+            e.g. 899
+        :param size:
+            e.g. SIZE_STANDARD_NORMAL
+        :param location:
+            e.g. 'throttle'
+        :return:
+            N/A
+        """
+        self.control_mapping[technical_name] = friendly_name
+        self.position_mapping[technical_name] = (x, y, size, location)
 
     def add_switch(self, control):
         if control not in self.control_mapping:
