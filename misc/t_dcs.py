@@ -420,109 +420,82 @@ class WarthogStick:
 
         self.switch_key = 'JOY_BTN3'  # 'JOY_BTN6 - '
 
-        self.control_mapping = {
-            # Joystick
-            'JOY_BTN7': 'tms_fwd',
-            self.switch_key + 'JOY_BTN7': 'tms_fwd_s',
-            'JOY_BTN9': 'tms_aft',
-            self.switch_key + 'JOY_BTN9': 'tms_aft_s',
-            'JOY_BTN10': 'tms_left',
-            self.switch_key + 'JOY_BTN10': 'tms_left_s',
-            'JOY_BTN8': 'tms_right',
-            self.switch_key + 'JOY_BTN8': 'tms_right_s',
-            'JOY_BTN11': 'dms_fwd',
-            self.switch_key + 'JOY_BTN11': 'dms_fwd_s',
-            'JOY_BTN13': 'dms_aft',
-            self.switch_key + 'JOY_BTN13': 'dms_aft_s',
-            'JOY_BTN14': 'dms_left',
-            self.switch_key + 'JOY_BTN14': 'dms_left_s',
-            'JOY_BTN12': 'dms_right',
-            self.switch_key + 'JOY_BTN12': 'dms_right_s',
-            'JOY_BTN_POV1_D': 'trim_down',
-            self.switch_key + 'JOY_BTN_POV1_D': 'trim_down_s',
-            'JOY_BTN_POV1_U': 'trim_up',
-            self.switch_key + 'JOY_BTN_POV1_U': 'trim_up_s',
-            'JOY_BTN_POV1_L': 'trim_left',
-            self.switch_key + 'JOY_BTN_POV1_L': 'trim_left_s',
-            'JOY_BTN_POV1_R': 'trim_right',
-            self.switch_key + 'JOY_BTN_POV1_R': 'trim_right_s',
-            'JOY_BTN15': 'cms_fwd',
-            self.switch_key + 'JOY_BTN15': 'cms_fwd_s',
-            'JOY_BTN17': 'cms_aft',
-            self.switch_key + 'JOY_BTN17': 'cms_aft_s',
-            'JOY_BTN18': 'cms_left',
-            self.switch_key + 'JOY_BTN18': 'cms_left_s',
-            'JOY_BTN16': 'cms_right',
-            self.switch_key + 'JOY_BTN16': 'cms_right_s',
-            '': 'cms_down',
-            self.switch_key + '': 'cms_down_s',
-            'JOY_BTN5': 'master_mode',
-            self.switch_key + 'JOY_BTN5': 'master_mode_s',
-            'JOY_BTN2': 'weapon_release',
-            self.switch_key + 'JOY_BTN2': 'weapon_release_s',
-            'JOY_BTN1': 'weapon_fire',
-            self.switch_key + 'JOY_BTN1': 'weapon_fire_s',
-            'JOY_BTN6': 'weapon_fire_2',
-            self.switch_key + 'JOY_BTN6': 'weapon_fire_2_s',
-            'JOY_BTN3': 'nose_wheel_steering',
-            self.switch_key + 'JOY_BTN3': 'nose_wheel_steering_s',
-            'JOY_BTN4': 'r_pinkie_switch',
-            self.switch_key + 'JOY_BTN4': 'r_pinkie_switch_s',
-        }
+        self.control_mapping = {}
+        self.position_mapping = {}
+        self.switched_mapping = {}
 
-        self.position_mapping = {
-            # Joystick
-            'JOY_BTN7': (622, 542, SIZE_MEDIUM, 'stick'),  # TMS FWD
-            'JOY_BTN9': (622, 642, SIZE_MEDIUM, 'stick'),  # TMS AFT
-            'JOY_BTN10': (526, 593, SIZE_MEDIUM, 'stick'),  # TMS LEFT
-            'JOY_BTN8': (713, 593, SIZE_MEDIUM, 'stick'),  # TMS RIGHT
-            'JOY_BTN11': (1449, 885, SIZE_MEDIUM, 'stick'),  # DMS FWD
-            'JOY_BTN13': (1449, 986, SIZE_MEDIUM, 'stick'),  # DMS AFT
-            'JOY_BTN14': (1350, 937, SIZE_MEDIUM, 'stick'),  # DMS LEFT
-            'JOY_BTN12': (1538, 937, SIZE_MEDIUM, 'stick'),  # DMS RIGHT
-            'JOY_BTN_POV1_D': (1388, 237, SIZE_MEDIUM, 'stick'),  # TRIM DOWN
-            'JOY_BTN_POV1_U': (1391, 342, SIZE_MEDIUM, 'stick'),  # TRIM UP
-            'JOY_BTN_POV1_L': (1290, 287, SIZE_MEDIUM, 'stick'),  # TRIM LEFT
-            'JOY_BTN_POV1_R': (1478, 287, SIZE_MEDIUM, 'stick'),  # TRIM RIGHT
-            'JOY_BTN15': (627, 905, SIZE_MEDIUM, 'stick'),  # CMS FWD
-            'JOY_BTN17': (627, 1007, SIZE_MEDIUM, 'stick'),  # CMS AFT
-            'JOY_BTN18': (531, 957, SIZE_MEDIUM, 'stick'),  # CMS LEFT
-            'JOY_BTN16': (718, 957, SIZE_MEDIUM, 'stick'),  # CMS RIGHT
-            '': (0, 0, SIZE_MEDIUM, 'stick'),  # CMS DOWN
-            'JOY_BTN5': (1524, 439, SIZE_MEDIUM, 'stick'),  # MASTER MODE
-            'JOY_BTN2': (975, 208, SIZE_MEDIUM, 'stick'),  # WEAPON RELEASE
-            'JOY_BTN1': (126, 659, SIZE_MEDIUM, 'stick'),  # WEAPON FIRE
-            'JOY_BTN6': (126, 727, SIZE_MEDIUM, 'stick'),  # WEAPON FIRE 2
-            'JOY_BTN3': (510, 1225, SIZE_MEDIUM, 'stick'),  # NOSE WHEEL STEERING
-            'JOY_BTN4': (510, 1158, SIZE_MEDIUM, 'stick'),  # PINKIE SWITCH
-        }
+        self.add_control('tms_fwd', 'JOY_BTN7', 403, 41, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_aft', 'JOY_BTN9', 403, 181, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_left', 'JOY_BTN10', 304, 109, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_right', 'JOY_BTN8', 527, 114, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_fwd', 'JOY_BTN11', 1324, 1005, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_aft', 'JOY_BTN13', 1324, 1144, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_left', 'JOY_BTN14', 1224, 1074, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_right', 'JOY_BTN12', 1446, 1072, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_down', 'JOY_BTN_POV1_D', 1186, 182, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_up', 'JOY_BTN_POV1_U', 1186, 41, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_left', 'JOY_BTN_POV1_L', 1084, 112, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_right', 'JOY_BTN_POV1_R', 1309, 112, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_fwd', 'JOY_BTN15', 413, 933, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_aft', 'JOY_BTN17', 413, 1073, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_left', 'JOY_BTN18', 315, 1004, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_right', 'JOY_BTN16', 534, 1004, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_down', '', 414, 1073, SIZE_STANDARD_NORMAL, 'stick')  # missing
+        self.add_control('master_mode', 'JOY_BTN5', 1545, 640, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_release', 'JOY_BTN2', 768, 112, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_fire', 'JOY_BTN1', 178, 514, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_fire_2', 'JOY_BTN6', 178, 609, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('nose_wheel_steering', 'JOY_BTN3', 178, 802, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('r_pinkie_switch', 'JOY_BTN4', 178, 704, SIZE_STANDARD_NORMAL, 'stick')
 
-        self.switched_mapping = {
-            # Joystick
-            'JOY_BTN7': (622, 542, SIZE_LARGE, 'stick'),  # TMS FWD
-            'JOY_BTN9': (622, 542, SIZE_LARGE, 'stick'),  # TMS AFT
-            'JOY_BTN10': (526, 593, SIZE_LARGE, 'stick'),  # TMS LEFT
-            'JOY_BTN8': (713, 593, SIZE_LARGE, 'stick'),  # TMS RIGHT
-            'JOY_BTN11': (1449, 885, SIZE_LARGE, 'stick'),  # DMS FWD
-            'JOY_BTN13': (1449, 986, SIZE_LARGE, 'stick'),  # DMS AFT
-            'JOY_BTN14': (1350, 937, SIZE_LARGE, 'stick'),  # DMS LEFT
-            'JOY_BTN12': (1538, 937, SIZE_LARGE, 'stick'),  # DMS RIGHT
-            'JOY_BTN_POV1_D': (1388, 237, SIZE_LARGE, 'stick'),  # TRIM DOWN
-            'JOY_BTN_POV1_U': (1391, 342, SIZE_LARGE, 'stick'),  # TRIM UP
-            'JOY_BTN_POV1_L': (1290, 287, SIZE_LARGE, 'stick'),  # TRIM LEFT
-            'JOY_BTN_POV1_R': (718, 287, SIZE_LARGE, 'stick'),  # TRIM RIGHT
-            'JOY_BTN15': (627, 905, SIZE_LARGE, 'stick'),  # CMS FWD
-            'JOY_BTN17': (627, 1007, SIZE_LARGE, 'stick'),  # CMS AFT
-            'JOY_BTN18': (531, 957, SIZE_LARGE, 'stick'),  # CMS LEFT
-            'JOY_BTN16': (718, 957, SIZE_LARGE, 'stick'),  # CMS RIGHT
-            '': (0, 0, SIZE_LARGE, 'stick'),  # CMS DOWN
-            'JOY_BTN5': (1524, 439, SIZE_LARGE, 'stick'),  # MASTER MODE
-            'JOY_BTN2': (975, 208, SIZE_LARGE, 'stick'),  # WEAPON RELEASE
-            'JOY_BTN1': (312, 659, SIZE_LARGE, 'stick'),  # WEAPON FIRE
-            'JOY_BTN6': (312, 727, SIZE_LARGE, 'stick'),  # WEAPON FIRE 2
-            'JOY_BTN3': (510, 1225, SIZE_LARGE, 'stick'),  # NOSE WHEEL STEERING
-            'JOY_BTN4': (510, 1158, SIZE_LARGE, 'stick'),  # PINKIE SWITCH
-        }
+        # Switched
+        self.add_control('tms_fwd_s', 'JOY_BTN7', 405, 264, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_aft_s', 'JOY_BTN9', 405, 404, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_left_s', 'JOY_BTN10', 307, 334, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_right_s', 'JOY_BTN8', 526, 336, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_fwd_s', 'JOY_BTN11', 1786, 1005, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_aft_s', 'JOY_BTN13', 1801, 1143, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_left_s', 'JOY_BTN14', 1686, 1073, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_right_s', 'JOY_BTN12', 1905, 1073, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_down_s', 'JOY_BTN_POV1_D', 1646, 42, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_up_s', 'JOY_BTN_POV1_U', 1646, 184, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_left_s', 'JOY_BTN_POV1_L', 1548, 116, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_right_s', 'JOY_BTN_POV1_R', 1770, 116, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_fwd_s', 'JOY_BTN15', 412, 1155, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_aft_s', 'JOY_BTN17', 412, 1292, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_left_s', 'JOY_BTN18', 315, 1225, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_right_s', 'JOY_BTN16', 539, 1225, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_down_s', '', 0, 0, SIZE_STANDARD_NORMAL, 'stick')  # missing
+        self.add_control('master_mode_s', 'JOY_BTN5', 1766, 645, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_release_s', 'JOY_BTN2', 768, 192, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_fire_s', 'JOY_BTN1', 398, 516, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_fire_2_s', 'JOY_BTN6', 398, 607, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('nose_wheel_steering_s', 'JOY_BTN3', 400, 803, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('r_pinkie_switch_s', 'JOY_BTN4', 400, 705, SIZE_STANDARD_NORMAL, 'stick')
+
+    def add_control(self, friendly_name, technical_name, x, y, size, location):
+        """
+        :param friendly_name:
+            e.g. 'Boat Switch FWD'
+        :param technical_name:
+            e.g. 'JOY_BTN9'
+        :param x:
+            e.g. 42
+        :param y:
+            e.g. 899
+        :param size:
+            e.g. SIZE_STANDARD_NORMAL
+        :param location:
+            e.g. 'throttle'
+        :return:
+            N/A
+        """
+        if friendly_name[-2:] != '_s':
+            self.control_mapping[technical_name] = friendly_name
+            self.position_mapping[technical_name] = (x, y, size, location)
+        else:
+            self.control_mapping[self.switch_key + technical_name] = friendly_name
+            self.switched_mapping[technical_name] = (x, y, size, location)
 
     def add_switch(self, control):
         if control not in self.control_mapping:
@@ -637,6 +610,7 @@ class WarthogThrottle:
         self.add_control('eng_l', 'JOY_BTN16', 2067, 1119, SIZE_STANDARD_NORMAL, 'throttle')
         self.add_control('eng_r', 'JOY_BTN17', 2289, 1119, SIZE_STANDARD_NORMAL, 'throttle')
 
+        # Switched
         self.add_control('coolie_switch_up_s', 'JOY_BTN_POV1_U', 1320, 23, SIZE_STANDARD_NORMAL, 'throttle')
         self.add_control('coolie_switch_down_s', 'JOY_BTN_POV1_D', 1320, 161, SIZE_STANDARD_NORMAL, 'throttle')
         self.add_control('coolie_switch_left_s', 'JOY_BTN_POV1_L', 1222, 95, SIZE_STANDARD_NORMAL, 'throttle')
