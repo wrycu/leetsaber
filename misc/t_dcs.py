@@ -45,9 +45,10 @@ class Renderer:
     def __init__(self, controller_type, controller_image):
         self.controller_type = controller_type
         self.controller_image = controller_image
+        self.base_path = str(os.path.join(Path(__file__).parent.absolute(), os.pardir))
 
     def render(self, controls, parent):
-        file_path = os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'img')
+        file_path = os.path.join(self.base_path, 'app', 'flask_app', 'static', 'img')
         # initialise the drawing context with
         # the image object as background
         image = Image.open(os.path.join(file_path, self.controller_image))
@@ -90,10 +91,9 @@ class Renderer:
         output.seek(0)
         return base64.b64encode(output.getvalue()).decode('utf-8')
 
-    @staticmethod
-    def draw_text(the_draw, x, y, size, message):
+    def draw_text(self, the_draw, x, y, size, message):
         font = ImageFont.truetype(
-            os.path.join(os.getcwd(), 'app', 'flask_app', 'static', 'font', 'lucon.ttf'),
+            os.path.join(self.base_path, 'app', 'flask_app', 'static', 'font', 'lucon.ttf'),
             size=12,
         )
         color = 'rgb(0, 0, 0)'  # black color
