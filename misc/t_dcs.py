@@ -45,7 +45,7 @@ class Renderer:
     def __init__(self, controller_type, controller_image):
         self.controller_type = controller_type
         self.controller_image = controller_image
-        self.base_path = str(os.path.join(Path(__file__).parent.absolute(), os.pardir))
+        self.base_path = os.path.join(str(Path(__file__).parent.absolute()), os.pardir)
 
     def render(self, controls, parent):
         file_path = os.path.join(self.base_path, 'app', 'flask_app', 'static', 'img')
