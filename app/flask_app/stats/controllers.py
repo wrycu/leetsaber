@@ -223,7 +223,8 @@ def user_stats(user_id=0):
     ).execute().fetchall()
 
     for result in results:
-        data['hours'] += int(result.time_played / 60 / 60)
+        if result.time_played:
+            data['hours'] += int(result.time_played / 60 / 60)
     data['games'] = len(set([x['gameId'] for x in results]))
     data['days'] = (arrow.now() - arrow.get('2016-02-07')).days
 
