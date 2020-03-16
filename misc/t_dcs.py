@@ -85,6 +85,7 @@ class Renderer:
                 (x, y, size, hotas) = parent.lookup_position(control, False)
             except Exception as e:
                 print("unknown control - {} - {}".format(control, e))
+                continue
             self.draw_text(draw, x, y, size, '(SWITCH)')
 
         # return the edited images (these are never written to disk)
