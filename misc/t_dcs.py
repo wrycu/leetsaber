@@ -81,7 +81,10 @@ class Renderer:
         for control in controls['switches']:
             if not control or control in parent.ignore_mapping:
                 continue
-            (x, y, size, hotas) = parent.lookup_position(control, False)
+            try:
+                (x, y, size, hotas) = parent.lookup_position(control, False)
+            except Exception as e:
+                print("unknown control - {} - {}".format(control, e))
             self.draw_text(draw, x, y, size, '(SWITCH)')
 
         # return the edited images (these are never written to disk)
@@ -544,6 +547,9 @@ class WarthogStick:
                 return None, None
 
     def lookup_position(self, control, switched):
+        if control not in self.position_mapping.keys() and not switched:
+            # this control doesn't actually exist
+            raise Exception("Control does not exist")
         if switched:
             return self.switched_mapping[control]
         else:
@@ -641,38 +647,39 @@ class WarthogThrottle:
         self.add_control('eng_r', 'JOY_BTN17', 1639, 877, SIZE_STANDARD_NORMAL, 'throttle')
 
         # Switched
-        self.add_control('coolie_switch_up_s', 'JOY_BTN_POV1_U', 1499, 22, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('coolie_switch_down_s', 'JOY_BTN_POV1_D', 1499, 163, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('coolie_switch_left_s', 'JOY_BTN_POV1_L', 1404, 95, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('coolie_switch_right_s', 'JOY_BTN_POV1_R', 1623, 95, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_fwd_s', 'JOY_BTN4', 580, 24, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_aft_s', 'JOY_BTN6', 580, 164, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_left_s', 'JOY_BTN3', 480, 94, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_right_s', 'JOY_BTN5', 703, 94, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('speedbrake_in_s', 'JOY_BTN8', 22, 369, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('speedbrake_out_s', 'JOY_BTN7', 242, 369, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('boat_switch_fwd_s', 'JOY_BTN9', 20, 651, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('boat_switch_aft_s', 'JOY_BTN10', 242, 651, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('china_hat_fwd_s', 'JOY_BTN11', 19, 868, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('china_hat_aft_s', 'JOY_BTN12', 242, 868, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('throttle_button_s', 'JOY_BTN15', 1629, 254, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('l_pinkie_switch_fwd_s', 'JOY_BTN13', 1421, 478, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('l_pinkie_switch_aft_s', 'JOY_BTN14', 1642, 478, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('flaps_up_s', 'JOY_BTN22', 18, 1089, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('flaps_down_s', 'JOY_BTN23', 241, 1089, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('eac_s', 'JOY_BTN24', 692, 1135, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('rdr_alt_s', 'JOY_BTN25', 692, 1035, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ap_s', 'JOY_BTN26', 1641, 1048, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('laste_alt_s', 'JOY_BTN28', 1151, 1138, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('laste_path_s', 'JOY_BTN27', 1151, 1038, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('lg_warn_s', 'JOY_BTN21', 1151, 938, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('apu_s', 'JOY_BTN20', 1641, 1047, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ign_l_s', 'JOY_BTN18', 1420, 747, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ign_r_s', 'JOY_BTN19', 1642, 747, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ign_l_s', 'JOY_BTN31', 1420, 747, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ign_r_s', 'JOY_BTN32', 1642, 747, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('eng_l_s', 'JOY_BTN16', 1419, 947, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('eng_r_s', 'JOY_BTN17', 1641, 947, SIZE_STANDARD_NORMAL, 'throttle')
+        if switch_key:
+            self.add_control('coolie_switch_up_s', 'JOY_BTN_POV1_U', 1499, 22, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_down_s', 'JOY_BTN_POV1_D', 1499, 163, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_left_s', 'JOY_BTN_POV1_L', 1404, 95, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_right_s', 'JOY_BTN_POV1_R', 1623, 95, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_fwd_s', 'JOY_BTN4', 580, 24, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_aft_s', 'JOY_BTN6', 580, 164, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_left_s', 'JOY_BTN3', 480, 94, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_right_s', 'JOY_BTN5', 703, 94, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('speedbrake_in_s', 'JOY_BTN8', 22, 369, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('speedbrake_out_s', 'JOY_BTN7', 242, 369, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('boat_switch_fwd_s', 'JOY_BTN9', 20, 651, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('boat_switch_aft_s', 'JOY_BTN10', 242, 651, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('china_hat_fwd_s', 'JOY_BTN11', 19, 868, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('china_hat_aft_s', 'JOY_BTN12', 242, 868, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('throttle_button_s', 'JOY_BTN15', 1629, 254, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('l_pinkie_switch_fwd_s', 'JOY_BTN13', 1421, 478, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('l_pinkie_switch_aft_s', 'JOY_BTN14', 1642, 478, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('flaps_up_s', 'JOY_BTN22', 18, 1089, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('flaps_down_s', 'JOY_BTN23', 241, 1089, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('eac_s', 'JOY_BTN24', 692, 1135, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('rdr_alt_s', 'JOY_BTN25', 692, 1035, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('ap_s', 'JOY_BTN26', 1641, 1048, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('laste_alt_s', 'JOY_BTN28', 1151, 1138, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('laste_path_s', 'JOY_BTN27', 1151, 1038, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('lg_warn_s', 'JOY_BTN21', 1151, 938, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('apu_s', 'JOY_BTN20', 1641, 1047, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('ign_l_s', 'JOY_BTN18', 1420, 747, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('ign_r_s', 'JOY_BTN19', 1642, 747, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('ign_l_s', 'JOY_BTN31', 1420, 747, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('ign_r_s', 'JOY_BTN32', 1642, 747, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('eng_l_s', 'JOY_BTN16', 1419, 947, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('eng_r_s', 'JOY_BTN17', 1641, 947, SIZE_STANDARD_NORMAL, 'throttle')
 
     def add_control(self, friendly_name, technical_name, x, y, size, location):
         """
