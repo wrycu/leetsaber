@@ -1,6 +1,56 @@
 {% extends "base.html" %}
 
 {% block body %}
+    <script>
+        function save_pic(controller) {
+            var link = document.createElement("a");
+            link.setAttribute("href", $('#' + controller + '_data').attr('src'));
+            link.setAttribute("download", controller + '.png');
+            link.click();
+        }
+        function upload(data) {
+            console.log(data);
+            $.ajax({
+                url: "{{ url_for('dcs.upload') }}",
+                type: 'POST',
+                data: data,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success: function(data) {
+                    $("#stick").html(data.split('|')[0]);
+                    $("#throttle").html(data.split('|')[1]);
+                    $("#stick_save").on("click", function(){
+                        save_pic('stick');
+                    });
+                    $("#throttle_save").on("click", function(){
+                        save_pic('throttle');
+                    });
+                    return;
+                },
+                error: function(xhr, text, error) {
+                    $("#error_content").text(xhr.responseText);
+                    $('.ui.modal').modal('show');
+                },
+            });
+        }
+
+        function dropHandler(ev) {
+            // Prevent default behavior (Prevent file from being opened)
+            ev.preventDefault();
+
+            if (ev.dataTransfer.items) {
+                var file = ev.dataTransfer.files;
+                var fd = new FormData();
+                fd.append('controls', file[0]);
+                upload(fd);
+            }
+        }
+
+        function dragOverHandler(ev) {
+            // Prevent default behavior (Prevent file from being opened)
+            ev.preventDefault();
+        }
+    </script>
     <div class="ui grid">
         <div class="centered row">
             <div class="ui message">
@@ -29,18 +79,28 @@
                 <li>Download visual control representation</li>
             </ol>
         </div>
+
         <div class="centered row">
-            <form method="post" id="myform">
-                <div class="field">
-                    <div class="ui action input">
-                        <label for="controls" class="ui icon button">
-                            <i class="attach icon"></i>
-                            Upload
-                            <input type="file" id="controls" name="controls" style="display: none">
-                        </label>
+            <div class="ui center aligned basic segment">
+                  <form method="post" id="myform">
+                        <div class="field">
+                            <div class="ui action input">
+                                <label for="controls" class="ui icon button">
+                                    <i class="attach icon"></i>
+                                    Upload
+                                    <input type="file" id="controls" name="controls" style="display: none">
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                  <div class="ui horizontal divider">
+                    Or
+                  </div>
+                    <div class="ui blue inverted segment" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+                        Drag and drop
+                        <i class="upload icon"></i>
                     </div>
-                </div>
-            </form>
+            </div>
         </div>
         <div class="row">
             <div class="five wide column"></div>
@@ -64,36 +124,8 @@
             $("#controls").change(function(){
                 var formData = new FormData($("#myform")[0]);
                 console.log(formData);
-                $.ajax({
-                    url: "{{ url_for('dcs.upload') }}",
-                    type: 'POST',
-                    data: formData,
-                    processData: false,  // tell jQuery not to process the data
-                    contentType: false,  // tell jQuery not to set contentType
-                    success: function(data) {
-                        $("#stick").html(data.split('|')[0]);
-                        $("#throttle").html(data.split('|')[1]);
-                        $("#stick_save").on("click", function(){
-                            save_pic('stick');
-                        });
-                        $("#throttle_save").on("click", function(){
-                            save_pic('throttle');
-                        });
-                        return;
-                    },
-                    error: function(xhr, text, error) {
-                        $("#error_content").text(xhr.responseText);
-                        $('.ui.modal').modal('show');
-                    },
-                });
+                upload(formData);
             });
-
-            function save_pic(controller) {
-                var link = document.createElement("a");
-                link.setAttribute("href", $('#' + controller + '_data').attr('src'));
-                link.setAttribute("download", controller + '.png');
-                link.click();
-            }
         });
     </script>
 {% endblock %}
