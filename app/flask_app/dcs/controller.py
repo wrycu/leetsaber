@@ -21,8 +21,38 @@ def landing():
 
 @dcs.route('/upload', methods=['POST'])
 def upload():
+    """
+    TODO
+    throw client-side error if they select >2 files
+    change font size based on character count
+CMS down is not in image
+label switched images
+
+IGN --> ENG OPER
+all IGN should be blue
+
+IGN L / IGN R are missing
+slew button --> include
+resize to be kneeboard sized?
+
+    :return:
+    """
     try:
-        return config.CONTROL_MAPPER.render_controls(request.files['controls'].read())
+        stick, throttle = config.CONTROL_MAPPER.render_controls(request.files['controls'].read())
+        if 'controls2' in request.files:
+            # user uploaded two files
+            stick2, throttle2 = config.CONTROL_MAPPER.render_controls(request.files['controls2'].read())
+            # we are not sure which file we parsed first. there are better ways to do this, but this is fastest :0
+            if not stick:
+                stick = stick2
+            elif not throttle:
+                throttle = throttle2
+
+        return render_template(
+            'dcs/hotas.html',
+            joystick=stick,
+            throttle=throttle,
+        )
     except Exception as e:
         print(e)
         return str(e), 400

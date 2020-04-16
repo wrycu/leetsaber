@@ -145,7 +145,7 @@ class ControlMapper:
                 controller = WarthogThrottle(switch_key)
         else:
             raise Exception(
-                "Unknown controller: {}. Supported controllers: {}".format(title, ','.join(self.controllers.keys()))
+                "Unknown controller: {}. Supported controllers: X-52, Warthog".format(title)
             )
 
         if controller.render_stick:
@@ -157,11 +157,7 @@ class ControlMapper:
         else:
             throttle_image = None
 
-        return render_template(
-            'dcs/hotas.html',
-            joystick=stick_image,
-            throttle=throttle_image,
-        )
+        return stick_image, throttle_image
 
 
 class X52:

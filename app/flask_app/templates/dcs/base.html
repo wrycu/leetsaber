@@ -42,6 +42,9 @@
                 var file = ev.dataTransfer.files;
                 var fd = new FormData();
                 fd.append('controls', file[0]);
+                // we only support two files. if they drag more, tough.
+                if (file.length > 1)
+                    fd.append('controls2', file[1]);
                 upload(fd);
             }
         }
