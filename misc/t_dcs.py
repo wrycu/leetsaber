@@ -106,7 +106,11 @@ class Renderer:
         color = 'rgb(0, 0, 0)'  # black color
         while len(message) > size:
             position = message[0:size].rfind(' ')
-            the_draw.text((x, y), message[0:position], fill=color, font=font)
+            if position != -1:
+                the_draw.text((x, y), message[0:position], fill=color, font=font)
+            else:
+                position = message[0:size].rfind('/')
+                the_draw.text((x, y), message[0:position + 1], fill=color, font=font)
             message = message[position + 1:]
             # next line should be 15 pixels down
             y += 15
