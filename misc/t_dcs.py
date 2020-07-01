@@ -11,7 +11,8 @@ SIZE_LARGE = 45
 SIZE_NORMAL = 30
 SIZE_MEDIUM = 20
 SIZE_SMALL = 16
-SIZE_STANDARD_NORMAL = 27
+SIZE_STANDARD_NORMAL = 18
+SIZE_STANDARD_SMALL = 27
 
 
 class Parser:
@@ -96,9 +97,11 @@ class Renderer:
         return base64.b64encode(output.getvalue()).decode('utf-8')
 
     def draw_text(self, the_draw, x, y, size, message):
+        # TODO known bugs:
+        # * if a given control has no spaces and is longer than the size permitted, we will hang
         font = ImageFont.truetype(
             os.path.join(self.base_path, 'app', 'flask_app', 'static', 'font', 'lucon.ttf'),
-            size=12,
+            size=18,
         )
         color = 'rgb(0, 0, 0)'  # black color
         while len(message) > size:
@@ -304,78 +307,76 @@ class X52:
 
         self.position_mapping = {
             # Joystick
-            'JOY_BTN2': (530, 123, SIZE_NORMAL, 'stick'),                              # fire
-            'JOY_BTN3': (1350, 101, SIZE_NORMAL, 'stick'),                             # fire A
-            'JOY_BTN4': (1350, 282, SIZE_NORMAL, 'stick'),                             # fire B
-            'JOY_BTN5': (530, 350, SIZE_NORMAL, 'stick'),                              # fire C
-            'JOY_BTN_POV1_U': (75, 342, SIZE_SMALL, 'stick'),                         # pov hat 1 up
-            'JOY_BTN_POV1_D': (75, 482, SIZE_SMALL, 'stick'),
-            'JOY_BTN_POV1_L': (5, 410, SIZE_SMALL, 'stick'),
-            'JOY_BTN_POV1_R': (140, 410, SIZE_SMALL, 'stick'),
-            'JOY_BTN16': (75, 109, SIZE_SMALL, 'stick'),                              # pov hat 2 up
-            'JOY_BTN18': (75, 249, SIZE_SMALL, 'stick'),                              # down
-            'JOY_BTN19': (5, 177, SIZE_SMALL, 'stick'),                               # left -13
-            'JOY_BTN17': (140, 177, SIZE_SMALL, 'stick'),                             # right
-            'JOY_BTN1': (1350, 461, SIZE_NORMAL, 'stick'),                             # trigger
-            'JOY_BTN15': (1620, 461, SIZE_NORMAL, 'stick'),                            # stage 2 trigger
-            'JOY_BTN9': (103, 609, SIZE_SMALL, 'stick'),                              # t1
-            'JOY_BTN10': (103, 679, SIZE_SMALL, 'stick'),
-            'JOY_BTN11': (230, 609, SIZE_SMALL, 'stick'),
-            'JOY_BTN12': (230, 679, SIZE_SMALL, 'stick'),
-            'JOY_BTN13': (358, 609, SIZE_SMALL, 'stick'),
-            'JOY_BTN14': (358, 679, SIZE_SMALL, 'stick'),
-            'JOY_BTN6': (1350, 644, SIZE_NORMAL, 'stick'),                                   # pinkie switch
-            'JOY_BTN24': (1620, 96, SIZE_NORMAL, 'stick'),                             # mode 1
-            'JOY_BTN25': (1620, 163, SIZE_NORMAL, 'stick'),
-            'JOY_BTN26': (1620, 233, SIZE_NORMAL, 'stick'),
+            'JOY_BTN2': (672, 5, SIZE_STANDARD_NORMAL, 'stick'),                              # fire
+            'JOY_BTN3': (902, 5, SIZE_STANDARD_NORMAL, 'stick'),                             # fire A
+            'JOY_BTN4': (902, 325, SIZE_STANDARD_NORMAL, 'stick'),                             # fire B
+            'JOY_BTN5': (482, 510, SIZE_STANDARD_NORMAL, 'stick'),                              # fire C
+            'JOY_BTN_POV1_U': (122, 505, SIZE_STANDARD_NORMAL, 'stick'),                         # pov hat 1 up
+            'JOY_BTN_POV1_D': (122, 645, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN_POV1_L': (22, 575, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN_POV1_R': (242, 575, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN16': (122, 35, SIZE_STANDARD_NORMAL, 'stick'),                              # pov hat 2 up
+            'JOY_BTN18': (122, 175, SIZE_STANDARD_NORMAL, 'stick'),                              # down
+            'JOY_BTN19': (22, 105, SIZE_STANDARD_NORMAL, 'stick'),                               # left -13
+            'JOY_BTN17': (242, 105, SIZE_STANDARD_NORMAL, 'stick'),                             # right
+            'JOY_BTN1': (1212, 395, SIZE_STANDARD_NORMAL, 'stick'),                             # trigger
+            'JOY_BTN15': (1212, 575, SIZE_STANDARD_NORMAL, 'stick'),                            # stage 2 trigger
+            'JOY_BTN9': (502, 865, SIZE_STANDARD_NORMAL, 'stick'),                              # t1
+            'JOY_BTN10': (502, 935, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN11': (722, 865, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN12': (722, 935, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN13': (942, 865, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN14': (942, 935, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN6': (1212, 760, SIZE_STANDARD_NORMAL, 'stick'),                                   # pinkie switch
+            'JOY_BTN24': (1212, 105, SIZE_STANDARD_NORMAL, 'stick'),                             # mode 1
+            'JOY_BTN25': (1212, 175, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN26': (1212, 245, SIZE_STANDARD_NORMAL, 'stick'),
             # Throttle
-            'JOY_BTN7': (1365, 266, SIZE_NORMAL, 'throttle'),                            # fire D
-            'JOY_BTN8': (1368, 54, SIZE_NORMAL, 'throttle'),                             # fire E
-            'JOY_BTN20': (78, 26, SIZE_SMALL, 'throttle'),                              # pov 3 up
-            'JOY_BTN22': (78, 167, SIZE_SMALL, 'throttle'),
-            'JOY_BTN23': (7, 97, SIZE_SMALL, 'throttle'),
-            'JOY_BTN21': (142, 99, SIZE_SMALL, 'throttle'),
-            'JOY_BTN27': (5, 586, SIZE_SMALL, 'throttle'),                              # throttle 1
-            'JOY_BTN28': (130, 586, SIZE_SMALL, 'throttle'),
-            'JOY_BTN29': (258, 586, SIZE_SMALL, 'throttle'),
-            'JOY_BTN31': (1367, 483, SIZE_NORMAL, 'throttle'),                            # mouse button 1
-            'JOY_BTN33': (61, 302, SIZE_SMALL, 'throttle'),                              # mouse wheel down
-            'JOY_BTN34': (198, 302, SIZE_SMALL, 'throttle'),                             # mouse wheel up
+            'JOY_BTN7': (752, 455, SIZE_STANDARD_NORMAL, 'throttle'),                            # fire D
+            'JOY_BTN8': (522, 305, SIZE_STANDARD_NORMAL, 'throttle'),                             # fire E
+            'JOY_BTN20': (157, 35, SIZE_STANDARD_NORMAL, 'throttle'),                              # pov 3 up
+            'JOY_BTN22': (157, 175, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN23': (57, 105, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN21': (277, 105, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN27': (2, 1015, SIZE_STANDARD_NORMAL, 'throttle'),                              # throttle 1
+            'JOY_BTN28': (222, 1015, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN29': (442, 1015, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN31': (2, 635, SIZE_STANDARD_NORMAL, 'throttle'),                            # mouse button 1
         }
 
         self.switched_mapping = {
             # Joystick
-            'JOY_BTN2': (530, 192, SIZE_NORMAL, 'stick'),  # fire switched
-            'JOY_BTN3': (1350, 170, SIZE_NORMAL, 'stick'),  # fire A switched
-            'JOY_BTN4': (1350, 351, SIZE_NORMAL, 'stick'),  # fire B switched
-            'JOY_BTN5': (530, 420, SIZE_NORMAL, 'stick'),  # fire C switched
-            'JOY_BTN_POV1_U': (333, 342, SIZE_SMALL, 'stick'),    # fire pov hat 1
-            'JOY_BTN_POV1_D': (333, 482, SIZE_SMALL, 'stick'),
-            'JOY_BTN_POV1_L': (263, 410, SIZE_SMALL, 'stick'),
-            'JOY_BTN_POV1_R': (396, 410, SIZE_SMALL, 'stick'),
-            'JOY_BTN16': (333, 109, SIZE_SMALL, 'stick'),  # pov hat 2 up switched
-            'JOY_BTN18': (333, 249, SIZE_SMALL, 'stick'),
-            'JOY_BTN19': (263, 177, SIZE_SMALL, 'stick'),
-            'JOY_BTN17': (396, 177, SIZE_SMALL, 'stick'),
-            'JOY_BTN1': (1350, 529, SIZE_NORMAL, 'stick'),  # trigger switched
-            'JOY_BTN15': (1620, 529, SIZE_NORMAL, 'stick'),  # stage 2 trigger switched
-            'JOY_BTN9': (103, 761, SIZE_SMALL, 'stick'),  # t1 switched
-            'JOY_BTN10': (103, 831, SIZE_SMALL, 'stick'),
-            'JOY_BTN11': (230, 761, SIZE_SMALL, 'stick'),
-            'JOY_BTN12': (230, 831, SIZE_SMALL, 'stick'),
-            'JOY_BTN13': (358, 761, SIZE_SMALL, 'stick'),
-            'JOY_BTN14': (358, 831, SIZE_SMALL, 'stick'),
+            'JOY_BTN2': (672, 75, SIZE_STANDARD_NORMAL, 'stick'),  # fire switched
+            'JOY_BTN3': (902, 75, SIZE_STANDARD_NORMAL, 'stick'),  # fire A switched
+            'JOY_BTN4': (902, 395, SIZE_STANDARD_NORMAL, 'stick'),  # fire B switched
+            'JOY_BTN5': (482, 480, SIZE_STANDARD_NORMAL, 'stick'),  # fire C switched
+            'JOY_BTN_POV1_U': (122, 725, SIZE_STANDARD_NORMAL, 'stick'),    # fire pov hat 1
+            'JOY_BTN_POV1_D': (122, 865, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN_POV1_L': (22, 795, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN_POV1_R': (242, 795, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN16': (122, 255, SIZE_STANDARD_NORMAL, 'stick'),  # pov hat 2 up switched
+            'JOY_BTN18': (122, 395, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN19': (22, 325, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN17': (242, 325, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN1': (1212, 465, SIZE_STANDARD_NORMAL, 'stick'),  # trigger switched
+            'JOY_BTN15': (1212, 645, SIZE_STANDARD_NORMAL, 'stick'),  # stage 2 trigger switched
+            'JOY_BTN9': (502, 1005, SIZE_STANDARD_NORMAL, 'stick'),  # t1 switched
+            'JOY_BTN10': (502, 1075, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN11': (722, 1005, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN12': (722, 1075, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN13': (942, 1005, SIZE_STANDARD_NORMAL, 'stick'),
+            'JOY_BTN14': (942, 1075, SIZE_STANDARD_NORMAL, 'stick'),
             # Throttle
-            'JOY_BTN7': (1597, 266, SIZE_NORMAL, 'throttle'),  # fire D switched
-            'JOY_BTN8': (1597, 54, SIZE_NORMAL, 'throttle'),   # fire E switched
-            'JOY_BTN20': (332, 26, SIZE_SMALL, 'throttle'),  # pov 3 up switched
-            'JOY_BTN22': (332, 167, SIZE_SMALL, 'throttle'),
-            'JOY_BTN23': (267, 97, SIZE_SMALL, 'throttle'),
-            'JOY_BTN21': (400, 99, SIZE_SMALL, 'throttle'),
-            'JOY_BTN27': (5, 668, SIZE_SMALL, 'throttle'),    # throttle 1
-            'JOY_BTN28': (130, 668, SIZE_SMALL, 'throttle'),
-            'JOY_BTN29': (258, 668, SIZE_SMALL, 'throttle'),
-            'JOY_BTN31': (1600, 483, SIZE_NORMAL, 'throttle'),  # mb 1 switched
+            'JOY_BTN7': (757, 525, SIZE_STANDARD_NORMAL, 'throttle'),  # fire D switched
+            'JOY_BTN8': (522, 375, SIZE_STANDARD_NORMAL, 'throttle'),   # fire E switched
+            'JOY_BTN20': (157, 255, SIZE_STANDARD_NORMAL, 'throttle'),  # pov 3 up switched
+            'JOY_BTN22': (157, 395, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN23': (57, 325, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN21': (277, 325, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN27': (2, 1085, SIZE_STANDARD_NORMAL, 'throttle'),    # throttle 1
+            'JOY_BTN28': (222, 1085, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN29': (442, 1085, SIZE_STANDARD_NORMAL, 'throttle'),
+            'JOY_BTN31': (2, 705, SIZE_STANDARD_NORMAL, 'throttle'),  # mb 1 switched
         }
 
     def add_switch(self, control):
@@ -407,7 +408,7 @@ class WarthogStick:
                 Mapping of buttons to actual buttons
 
                 Stick
-                    Fire                JOY_BTN2        530, 135        530, 205
+                    Fire                JOY_BTN2
                     TMS FWD             JOY_BTN7
                     TMS AFT             JOY_BTN9
                     TMS LEFT            JOY_BTN10
@@ -424,7 +425,7 @@ class WarthogStick:
                     CMS AFT             JOY_BTN17
                     CMS LEFT            JOY_BTN18
                     CMS RIGHT           JOY_BTN16
-                    CMS DOWN
+                    CMS DOWN            JOY_BTN19
                     MASTER MODE         JOY_BTN5
                     WEAPON RELEASE      JOY_BTN2
                     TRIGGER             JOY_BTN1
@@ -454,55 +455,56 @@ class WarthogStick:
         self.position_mapping = {}
         self.switched_mapping = {}
 
-        self.add_control('tms_fwd', 'JOY_BTN7', 147, 41, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('tms_aft', 'JOY_BTN9', 147, 181, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('tms_left', 'JOY_BTN10', 49, 116, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('tms_right', 'JOY_BTN8', 271, 116, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('dms_fwd', 'JOY_BTN11', 930, 1036, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('dms_aft', 'JOY_BTN13', 933, 1175, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('dms_left', 'JOY_BTN14', 830, 1105, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('dms_right', 'JOY_BTN12', 1051, 1105, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('trim_up', 'JOY_BTN_POV1_U', 928, 46, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('trim_down', 'JOY_BTN_POV1_D', 928, 186, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('trim_left', 'JOY_BTN_POV1_L', 829, 113, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('trim_right', 'JOY_BTN_POV1_R', 1052, 113, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('cms_fwd', 'JOY_BTN15', 162, 936, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('cms_aft', 'JOY_BTN17', 162, 1074, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('cms_left', 'JOY_BTN18', 59, 1003, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('cms_right', 'JOY_BTN16', 282, 1003, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('cms_down', '', 0, 0, SIZE_STANDARD_NORMAL, 'stick')  # missing
-        self.add_control('master_mode', 'JOY_BTN5', 1291, 647, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('weapon_release', 'JOY_BTN2', 513, 112, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('weapon_fire', 'JOY_BTN1', 178, 514, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('weapon_fire_2', 'JOY_BTN6', 178, 609, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('nose_wheel_steering', 'JOY_BTN3', 178, 802, SIZE_STANDARD_NORMAL, 'stick')
-        self.add_control('r_pinkie_switch', 'JOY_BTN4', 178, 704, SIZE_STANDARD_NORMAL, 'stick')
+        # to determine these numbers, add two to the left value and five to the top value
+        self.add_control('tms_fwd', 'JOY_BTN7', 122, 35, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_aft', 'JOY_BTN9', 122, 175, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_left', 'JOY_BTN10', 22, 105, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('tms_right', 'JOY_BTN8', 242, 105, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_release', 'JOY_BTN2', 482, 105, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_up', 'JOY_BTN_POV1_U', 812, 35, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_down', 'JOY_BTN_POV1_D', 812, 175, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_left', 'JOY_BTN_POV1_L', 712, 105, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('trim_right', 'JOY_BTN_POV1_R', 932, 105, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('master_mode', 'JOY_BTN5', 1122, 735, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_fwd', 'JOY_BTN11', 812, 955, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_aft', 'JOY_BTN13', 812, 1095, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_left', 'JOY_BTN14', 712, 1025, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('dms_right', 'JOY_BTN12', 932, 1025, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_fwd', 'JOY_BTN15', 232, 925, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_aft', 'JOY_BTN17', 232, 1065, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_left', 'JOY_BTN18', 132, 995, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_right', 'JOY_BTN16', 352, 995, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('cms_down', 'JOY_BTN19', 12, 1065, SIZE_STANDARD_NORMAL, 'stick')  # missing
+        self.add_control('nose_wheel_steering', 'JOY_BTN3', 162, 795, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('r_pinkie_switch', 'JOY_BTN4', 162, 695, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_fire_2', 'JOY_BTN6', 162, 595, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('weapon_fire', 'JOY_BTN1', 162, 505, SIZE_STANDARD_NORMAL, 'stick')
 
         # Switched
         if switch_key:
-            self.add_control('tms_fwd_s', 'JOY_BTN7', 147, 266, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('tms_aft_s', 'JOY_BTN9', 147, 404, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('tms_left_s', 'JOY_BTN10', 52, 336, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('tms_right_s', 'JOY_BTN8', 276, 336, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('dms_fwd_s', 'JOY_BTN11', 1390, 1033, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('dms_aft_s', 'JOY_BTN13', 1390, 1172, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('dms_left_s', 'JOY_BTN14', 1293, 1104, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('dms_right_s', 'JOY_BTN12', 1510, 1104, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('trim_up_s', 'JOY_BTN_POV1_U', 1389, 44, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('trim_down_s', 'JOY_BTN_POV1_D', 1389, 185, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('trim_left_s', 'JOY_BTN_POV1_L', 1291, 114, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('trim_right_s', 'JOY_BTN_POV1_R', 1508, 114, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('cms_fwd_s', 'JOY_BTN15', 162, 1153, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('cms_aft_s', 'JOY_BTN17', 162, 1294, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('cms_left_s', 'JOY_BTN18', 61, 1223, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('cms_right_s', 'JOY_BTN16', 282, 1224, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('cms_down_s', '', 0, 0, SIZE_STANDARD_NORMAL, 'stick')  # missing
-            self.add_control('master_mode_s', 'JOY_BTN5', 1512, 645, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('weapon_release_s', 'JOY_BTN2', 515, 198, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('weapon_fire_s', 'JOY_BTN1', 398, 516, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('weapon_fire_2_s', 'JOY_BTN6', 398, 607, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('nose_wheel_steering_s', 'JOY_BTN3', 400, 803, SIZE_STANDARD_NORMAL, 'stick')
-            self.add_control('r_pinkie_switch_s', 'JOY_BTN4', 400, 705, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('tms_fwd_s', 'JOY_BTN7', 122, 255, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('tms_aft_s', 'JOY_BTN9', 122, 395, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('tms_left_s', 'JOY_BTN10', 22, 325, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('tms_right_s', 'JOY_BTN8', 242, 325, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('weapon_release_s', 'JOY_BTN2', 482, 185, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('trim_up_s', 'JOY_BTN_POV1_U', 1272, 35, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('trim_down_s', 'JOY_BTN_POV1_D', 1272, 175, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('trim_left_s', 'JOY_BTN_POV1_L', 1172, 105, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('trim_right_s', 'JOY_BTN_POV1_R', 1392, 105, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('master_mode_s', 'JOY_BTN5', 1342, 735, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('dms_fwd_s', 'JOY_BTN11', 1272, 955, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('dms_aft_s', 'JOY_BTN13', 1272, 1095, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('dms_left_s', 'JOY_BTN14', 1172, 1025, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('dms_right_s', 'JOY_BTN12', 1392, 1025, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('cms_fwd_s', 'JOY_BTN15', 232, 1145, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('cms_aft_s', 'JOY_BTN17', 232, 1285, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('cms_left_s', 'JOY_BTN18', 132, 1210, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('cms_right_s', 'JOY_BTN16', 352, 1210, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('cms_down_s', 'JOY_BTN19', 12, 1285, SIZE_STANDARD_NORMAL, 'stick')  # missing
+            self.add_control('nose_wheel_steering_s', 'JOY_BTN3', 382, 795, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('r_pinkie_switch_s', 'JOY_BTN4', 382, 695, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('weapon_fire_2_s', 'JOY_BTN6', 382, 595, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('weapon_fire_s', 'JOY_BTN1', 382, 505, SIZE_STANDARD_NORMAL, 'stick')
 
     def add_control(self, friendly_name, technical_name, x, y, size, location):
         """
@@ -613,71 +615,65 @@ class WarthogThrottle:
         self.position_mapping = {}
         self.switched_mapping = {}
 
-        self.add_control('coolie_switch_up', 'JOY_BTN_POV1_U', 1037, 23, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('coolie_switch_down', 'JOY_BTN_POV1_D', 1037, 164, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('coolie_switch_left', 'JOY_BTN_POV1_L', 939, 95, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('coolie_switch_right', 'JOY_BTN_POV1_R', 1161, 95, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_fwd', 'JOY_BTN4', 120, 23, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_aft', 'JOY_BTN6', 120, 165, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_left', 'JOY_BTN3', 21, 93, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('mic_switch_right', 'JOY_BTN5', 240, 93, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('speedbrake_in', 'JOY_BTN8', 18, 300, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('speedbrake_out', 'JOY_BTN7', 241, 301, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('boat_switch_fwd', 'JOY_BTN9', 17, 585, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('boat_switch_aft', 'JOY_BTN10', 243, 585, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('china_hat_fwd', 'JOY_BTN11', 17, 799, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('china_hat_aft', 'JOY_BTN12', 243, 799, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('throttle_button', 'JOY_BTN15', 1411, 256, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('l_pinkie_switch_fwd', 'JOY_BTN13', 1419, 405, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('l_pinkie_switch_aft', 'JOY_BTN14', 1641, 407, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('flaps_up', 'JOY_BTN22', 21, 1020, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('flaps_down', 'JOY_BTN23', 240, 1020, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('eac', 'JOY_BTN24', 474, 1137, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('rdr_alt', 'JOY_BTN25', 474, 1037, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ap', 'JOY_BTN26', 474, 934, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('laste_path', 'JOY_BTN27', 930, 1035, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('laste_alt', 'JOY_BTN28', 930, 1135, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('lg_warn', 'JOY_BTN21', 930, 935, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('apu', 'JOY_BTN20', 1419, 1049, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ign_l', 'JOY_BTN18', 1419, 676, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('ign_r', 'JOY_BTN19', 1644, 677, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('eng_l', 'JOY_BTN16', 1419, 877, SIZE_STANDARD_NORMAL, 'throttle')
-        self.add_control('eng_r', 'JOY_BTN17', 1639, 877, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('mic_switch_fwd', 'JOY_BTN4', 112, 15, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('mic_switch_aft', 'JOY_BTN6', 112, 155, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('mic_switch_left', 'JOY_BTN3', 12, 85, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('mic_switch_right', 'JOY_BTN5', 232, 85, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('coolie_switch_up', 'JOY_BTN_POV1_U', 1032, 15, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('coolie_switch_down', 'JOY_BTN_POV1_D', 1032, 155, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('coolie_switch_left', 'JOY_BTN_POV1_L', 932, 85, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('coolie_switch_right', 'JOY_BTN_POV1_R', 1152, 85, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('throttle_button', 'JOY_BTN15', 1412, 285, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('l_pinkie_switch_fwd', 'JOY_BTN13', 1412, 405, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('l_pinkie_switch_aft', 'JOY_BTN14', 1632, 385, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('ign_l', 'JOY_BTN18', 1412, 655, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('ign_r', 'JOY_BTN19', 1632, 655, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('eng_l', 'JOY_BTN16', 1412, 730, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('eng_r', 'JOY_BTN17', 1632, 730, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('apu', 'JOY_BTN20', 1412, 865, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('lg_warn', 'JOY_BTN21', 922, 825, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('laste_path', 'JOY_BTN27', 922, 925, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('laste_alt', 'JOY_BTN28', 922, 1025, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('eac', 'JOY_BTN24', 472, 825, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('rdr_alt', 'JOY_BTN25', 472, 925, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('ap', 'JOY_BTN26', 472, 1025, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('flaps_up', 'JOY_BTN22', 12, 955, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('flaps_down', 'JOY_BTN23', 232, 955, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('china_hat_fwd', 'JOY_BTN11', 12, 735, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('china_hat_aft', 'JOY_BTN12', 232, 735, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('boat_switch_fwd', 'JOY_BTN9', 12, 520, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('boat_switch_aft', 'JOY_BTN10', 232, 520, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('speedbrake_in', 'JOY_BTN8', 12, 235, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('speedbrake_out', 'JOY_BTN7', 232, 235, SIZE_STANDARD_NORMAL, 'throttle')
 
         # Switched
         if switch_key:
-            self.add_control('coolie_switch_up_s', 'JOY_BTN_POV1_U', 1499, 22, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('coolie_switch_down_s', 'JOY_BTN_POV1_D', 1499, 163, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('coolie_switch_left_s', 'JOY_BTN_POV1_L', 1404, 95, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('coolie_switch_right_s', 'JOY_BTN_POV1_R', 1623, 95, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('mic_switch_fwd_s', 'JOY_BTN4', 580, 24, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('mic_switch_aft_s', 'JOY_BTN6', 580, 164, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('mic_switch_left_s', 'JOY_BTN3', 480, 94, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('mic_switch_right_s', 'JOY_BTN5', 703, 94, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('speedbrake_in_s', 'JOY_BTN8', 22, 369, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('speedbrake_out_s', 'JOY_BTN7', 242, 369, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('boat_switch_fwd_s', 'JOY_BTN9', 20, 651, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('boat_switch_aft_s', 'JOY_BTN10', 242, 651, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('china_hat_fwd_s', 'JOY_BTN11', 19, 868, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('china_hat_aft_s', 'JOY_BTN12', 242, 868, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('throttle_button_s', 'JOY_BTN15', 1629, 254, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('l_pinkie_switch_fwd_s', 'JOY_BTN13', 1421, 478, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('l_pinkie_switch_aft_s', 'JOY_BTN14', 1642, 478, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('flaps_up_s', 'JOY_BTN22', 18, 1089, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('flaps_down_s', 'JOY_BTN23', 241, 1089, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('eac_s', 'JOY_BTN24', 692, 1135, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('rdr_alt_s', 'JOY_BTN25', 692, 1035, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('ap_s', 'JOY_BTN26', 1641, 1048, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('laste_alt_s', 'JOY_BTN28', 1151, 1138, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('laste_path_s', 'JOY_BTN27', 1151, 1038, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('lg_warn_s', 'JOY_BTN21', 1151, 938, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('apu_s', 'JOY_BTN20', 1641, 1047, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('ign_l_s', 'JOY_BTN18', 1420, 747, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('ign_r_s', 'JOY_BTN19', 1642, 747, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('ign_l_s', 'JOY_BTN31', 1420, 747, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('ign_r_s', 'JOY_BTN32', 1642, 747, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('eng_l_s', 'JOY_BTN16', 1419, 947, SIZE_STANDARD_NORMAL, 'throttle')
-            self.add_control('eng_r_s', 'JOY_BTN17', 1641, 947, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_fwd_s', 'JOY_BTN4', 572, 15, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_aft_s', 'JOY_BTN6', 572, 155, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_left_s', 'JOY_BTN3', 472, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('mic_switch_right_s', 'JOY_BTN5', 692, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_up_s', 'JOY_BTN_POV1_U', 1492, 15, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_down_s', 'JOY_BTN_POV1_D', 1492, 155, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_left_s', 'JOY_BTN_POV1_L', 1392, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('coolie_switch_right_s', 'JOY_BTN_POV1_R', 1612, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('throttle_button_s', 'JOY_BTN15', 1632, 285, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('l_pinkie_switch_fwd_s', 'JOY_BTN13', 1412, 455, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('l_pinkie_switch_aft_s', 'JOY_BTN14', 1632, 455, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('apu_s', 'JOY_BTN20', 1632, 865, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('lg_warn_s', 'JOY_BTN21', 1142, 825, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('laste_path_s', 'JOY_BTN27', 1142, 925, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('laste_alt_s', 'JOY_BTN28', 1142, 1025, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('eac_s', 'JOY_BTN24', 692, 825, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('rdr_alt_s', 'JOY_BTN25', 692, 925, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('ap_s', 'JOY_BTN26', 692, 1025, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('flaps_up_s', 'JOY_BTN22', 12, 1025, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('flaps_down_s', 'JOY_BTN23', 232, 1025, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('china_hat_fwd_s', 'JOY_BTN11', 12, 805, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('china_hat_aft_s', 'JOY_BTN12', 232, 805, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('boat_switch_fwd_s', 'JOY_BTN9', 12, 590, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('boat_switch_aft_s', 'JOY_BTN10', 232, 590, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('speedbrake_in_s', 'JOY_BTN8', 12, 305, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('speedbrake_out_s', 'JOY_BTN7', 232, 305, SIZE_STANDARD_NORMAL, 'throttle')
 
     def add_control(self, friendly_name, technical_name, x, y, size, location):
         """
