@@ -36,30 +36,30 @@
         </tr>
     </thead>
     <tbody>
-        {% for mission_name, mission_data in missions.items() %}
+        {% for details in missions %}
             <tr>
                 <td class="two wide">
-                    {{ mission_name }}
+                    {{ details['name'] }}
                 </td>
                 <td class="two wide">
-                    {{ mission_data['terrain'] }}
+                    {{ details['terrain'] }}
                 </td>
                 <td class="one wide">
-                    {{ mission_data['time'] }}
+                    {{ details['time'] }}
                 </td>
                 <td>
                     <table class="ui very basic collapsing celled table">
                     <tbody>
                     <tr>
-                    {% for aircraft, details in mission_data['factions']['blue']['aircraft'].items() %}
+                    {% for aircraft, a_details in details['factions']['blue']['aircraft'].items() %}
                             <td>
                                 {{ aircraft }}
                             </td>
                     {% endfor %}
                     </tr><tr>
-                    {% for aircraft, details in mission_data['factions']['blue']['aircraft'].items() %}
+                    {% for aircraft, a_details in details['factions']['blue']['aircraft'].items() %}
                         <td>
-                            {{ details }}
+                            {{ a_details }}
                         </td>
                     {% endfor %}
                     </tr>

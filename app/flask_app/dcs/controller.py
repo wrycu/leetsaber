@@ -23,18 +23,13 @@ def landing():
 def upload():
     """
     TODO
-    throw client-side error if they select >2 files
-    change font size based on character count
-CMS down is not in image
-label switched images
-
-IGN --> ENG OPER
-all IGN should be blue
-
-IGN L / IGN R are missing
-slew button --> include
-resize to be kneeboard sized?
-
+        Throw client-side error if they select >2 files
+        Change font size based on character count
+        Include axis
+            slew button
+            slider
+        Resize to be kneeboard sized?
+        Include none-controller modifiers (e.g. keyboard)
     :return:
     """
     try:
@@ -77,7 +72,6 @@ def list_missions():
         for pilot in request.json['pilot']:
             modules = world_pilots[request.json['context']][pilot]
             pilot_mapping[pilot] = [x for x in modules if modules[x] == '1']
-        print(pilot_mapping)
         # ok, now build a list of slots available in the mission
         missions = {}
 
@@ -99,7 +93,7 @@ def list_missions():
                 missions[result.mission_id] = {}
             if result.name not in missions[result.mission_id]:
                 missions[result.mission_id][result.name] = 0
-            missions[result.mission_id][result.name] += 1
+            missions[result.mission_id][result.name] = result.module_count
 
         print(missions)
         matched = []
@@ -115,10 +109,11 @@ def list_missions():
             else:
                 print("Couldn't find matching for {} - slots - {}".format(m_id, mission))
 
-        matched_details = {}
+        matched_details = []
         # select details for matched missions
         for mission in matched:
             results = select([
+                config.DCS_MISSION_TABLE.c.id,
                 config.DCS_MISSION_TABLE.c.name.label('mission_name'),
                 config.DCS_MISSION_TABLE.c.map,
                 config.DCS_MISSION_TABLE.c.start_time,
@@ -126,7 +121,7 @@ def list_missions():
                 config.DCS_MISSION_TABLE.c.id == mission
             ).execute().fetchall()
             for result in results:
-                matched_details[result.mission_name] = {
+                details = {
                     'terrain': result.map,
                     'time': result.start_time,
                     'factions': {
@@ -136,7 +131,10 @@ def list_missions():
                         'red': {
                             'aircraft': {},
                         },
-                    }
+                    },
+                    'total_slots': 0,
+                    'id': result.id,
+                    'name': result.mission_name,
                 }
                 # get aircraft in the mission
                 raw_planes = select([
@@ -151,8 +149,10 @@ def list_missions():
                     config.DCS_M_M_TABLE.c.mission_id == mission
                 ).execute().fetchall()
                 for plane in raw_planes:
-                    matched_details[result.mission_name]['factions']['blue']['aircraft'][plane.name] = plane.module_count
-        print(pilot_mapping)
+                    details['factions']['blue']['aircraft'][plane.name] = plane.module_count
+                    details['total_slots'] += plane.module_count
+                matched_details.append(details)
+        matched_details = sorted(matched_details, key=lambda k: k['total_slots'])
         return Response(
             json.dumps({
                 'status': render_template(
@@ -165,4 +165,3 @@ def list_missions():
             }),
             mimetype='application/json'
         )
-        return Response(json.dumps({'status': 'you <b>did</b> it!'}), mimetype='application/json')
