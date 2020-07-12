@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup as bs
+import requests
 from flask import render_template
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -730,8 +731,82 @@ class WarthogThrottle:
 
 
 class MissionParser:
-    def __init__(self):
+    def __init__(self, save_dir=None, last_download_id=None):
         self.msn = pydcs.Mission()
+        self.download_base = 'https://www.digitalcombatsimulator.com'
+        if save_dir:
+            self.save_dir = save_dir
+        else:
+            self.save_dir = 'C:\\users\\tim\\downloads\\missions\\ed'
+        if last_download_id:
+            self.last_download_id = last_download_id
+        else:
+            self.last_download_id = '3307006'
+
+    def find_missions(self):
+        # get the number of pages
+        reply = requests.get(
+            'https://www.digitalcombatsimulator.com/en/files/?PER_PAGE=100&PAGEN_1={}&set_filter=Filter&arrFilter_pf%5Bfiletype%5D=2&arrFilter_pf%5Bgameversion%5D=&arrFilter_pf%5Bfilelang%5D=&arrFilter_pf%5Baircraft%5D=&arrFilter_DATE_CREATE_1_DAYS_TO_BACK=&CREATED_BY=&sort_by_order=TIMESTAMP_X_DESC&LICENCE_FREE=yes'.format(
+                1,
+            )
+        )
+        reply.raise_for_status()
+        soup = bs(reply.text, 'html.parser')
+        entries = bs.findAll(soup, attrs={'class': 'page-link'})[-2]
+        num_pages = int(entries.text)
+        #num_pages = 1
+        last_downloaded_id = None
+        page_size = 100
+
+        print("Found {} pages!".format(num_pages))
+
+        for x in range(1, num_pages + 1):
+            print("Now downloading missions from page {}".format(x))
+            reply = requests.get(
+                'https://www.digitalcombatsimulator.com/en/files/?PER_PAGE={}&PAGEN_1={}&set_filter=Filter&arrFilter_pf%5Bfiletype%5D=2&arrFilter_pf%5Bgameversion%5D=&arrFilter_pf%5Bfilelang%5D=&arrFilter_pf%5Baircraft%5D=&arrFilter_DATE_CREATE_1_DAYS_TO_BACK=&CREATED_BY=&sort_by_order=TIMESTAMP_X_DESC&LICENCE_FREE=yes'.format(
+                    page_size,
+                    x,
+                )
+            )
+
+            reply.raise_for_status()
+            try:
+                last_downloaded_id = self.download_missions(reply.text)
+            except Exception as e:
+                print("Exception:", e)
+                break
+
+        print("Done downloading all missions!")
+        return last_downloaded_id
+
+    def download_missions(self, results):
+        soup = bs(results, 'html.parser')
+        entries = bs.findAll(soup, attrs={'class': 'download'})
+        last_downloaded_mission = None
+        for entry in entries:
+            print("Downloading mission with ID", entry.attrs['data-id'])
+            url = entry.attrs['href']
+            file_name = url.split('/')[-1]
+            # make a basic attempt at sanitization
+            file_name = file_name.replace('...', '.')
+            file_name = file_name.replace('..', '.')
+            if entry.attrs['data-id'] == self.last_download_id:
+                raise Exception("Found previously downloaded mission - quitting")
+            reply = requests.get(
+                '{}/{}'.format(
+                    self.download_base,
+                    entry.attrs['href']
+                )
+            )
+            reply.raise_for_status()
+            open(
+                '{}\\{}'.format(self.save_dir, file_name),
+                'wb'
+            ).write(
+                reply.content
+            )
+            last_downloaded_mission = entry.attrs['data-id']
+        return last_downloaded_mission
 
     @staticmethod
     def list_missions(path=None):
@@ -854,3 +929,26 @@ class MissionSearcher:
             return False
         else:
             return True
+
+
+if __name__ == '__main__':
+    from configparser import ConfigParser
+    config_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), os.pardir, 'config.ini')
+    config = ConfigParser()
+    config.read(config_dir)
+
+    last_downloaded = config.get('dcs', 'last_downloaded')
+    if last_downloaded != 0:
+        m_parse = MissionParser(
+            config.get('dcs', 'mission_path3'),
+            last_downloaded,
+        )
+    else:
+        m_parse = MissionParser(
+            config.get('dcs', 'mission_path3'),
+        )
+    last_downloaded = m_parse.find_missions()
+    if last_downloaded:
+        config.set('dcs', 'last_downloaded', str(last_downloaded))
+        with open(config_dir, 'w') as f:
+            config.write(f)
