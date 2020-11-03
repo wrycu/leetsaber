@@ -151,9 +151,14 @@ class ControlMapper:
                 controller = WarthogStick(switch_key)
             elif 'Throttle' in title:
                 controller = WarthogThrottle(switch_key)
+        elif 'X56' in title:
+            if 'Stick' in title:
+                controller = X56Stick(switch_key)
+            elif 'Throttle' in title:
+                controller = X56Throttle(switch_key)
         else:
             raise Exception(
-                "Unknown controller: {}. Supported controllers: X-52, Warthog".format(title)
+                "Unknown controller: {}. Supported controllers: X-52, X-56, Warthog".format(title)
             )
 
         if controller.render_stick:
@@ -679,6 +684,315 @@ class WarthogThrottle:
             self.add_control('boat_switch_aft_s', 'JOY_BTN10', 232, 590, SIZE_STANDARD_NORMAL, 'throttle')
             self.add_control('speedbrake_in_s', 'JOY_BTN8', 12, 305, SIZE_STANDARD_NORMAL, 'throttle')
             self.add_control('speedbrake_out_s', 'JOY_BTN7', 232, 305, SIZE_STANDARD_NORMAL, 'throttle')
+
+    def add_control(self, friendly_name, technical_name, x, y, size, location):
+        """
+        :param friendly_name:
+            e.g. 'Boat Switch FWD'
+        :param technical_name:
+            e.g. 'JOY_BTN9'
+        :param x:
+            e.g. 42
+        :param y:
+            e.g. 899
+        :param size:
+            e.g. SIZE_STANDARD_NORMAL
+        :param location:
+            e.g. 'throttle'
+        :return:
+            N/A
+        """
+        if friendly_name[-2:] != '_s':
+            self.control_mapping[technical_name] = friendly_name
+            self.position_mapping[technical_name] = (x, y, size, location)
+        else:
+            self.control_mapping[self.switch_key + technical_name] = friendly_name
+            self.switched_mapping[technical_name] = (x, y, size, location)
+
+    def add_switch(self, control):
+        if control not in self.control_mapping:
+            raise Exception("Unknown switch detected - {}".format(control))
+        self.switches.append(control)
+
+    def lookup_control(self, control):
+        if not control:
+            return None, None
+        try:
+            return self.control_mapping[control], False
+        except KeyError:
+            try:
+                return self.control_mapping[control], True
+            except KeyError:
+                return None, None
+
+    def lookup_position(self, control, switched):
+        if control not in self.position_mapping.keys() and not switched:
+            # this control doesn't actually exist
+            raise Exception("Control does not exist")
+        if switched:
+            return self.switched_mapping[control]
+        else:
+            return self.position_mapping[control]
+
+
+class X56Stick:
+    def __init__(self, switch_key):
+        """
+                Mapping of buttons to actual buttons
+                Index               JOY_BTN1
+                Pinky_D             JOY_BTN5
+                Pinky_TRG           JOY_BTN6
+                C Stick Press       JOY_BTN4
+                Hat 1 Up            JOY_BTN7
+                Hat 1 Down          JOY_BTN9
+                Hat 1 Left          JOY_BTN10
+                Hat 1 Right         JOY_BTN8
+                Stick Right Button  JOY_BTN3
+                Hat 2 Up            JOY_BTN11
+                Hat 2 Down          JOY_BTN13
+                Hat 2 Left          JOY_BTN14
+                Hat 2 Right         JOY_BTN12
+                POV 1 Up            JOY_BTN_POV1_U
+                POV 1 Down          JOY_BTN_POV1_D
+                POV 1 Left          JOY_BTN_POV1_L
+                POV 1 Right         JOY_BTN_POV1_R
+                Stick Top Button    JOY_BTN2
+        """
+        self.name = 'x56_stick'
+        self.controller_type = 'hotas'
+        self.ignore_mapping = {
+            'JOY_Z',
+            'JOY_Y',
+            'JOY_X',
+            'JOY_RZ',
+            'JOY_RY',
+            'JOY_RX',
+        }
+        self.switches = []
+        self.stick_file = 'x56_stick.png'
+        self.render_stick = True
+        self.render_throttle = False
+
+        self.switch_key = switch_key
+        self.control_mapping = {}
+        self.position_mapping = {}
+        self.switched_mapping = {}
+
+        self.add_control('index', 'JOY_BTN1', 122, 515, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('pinky_d', 'JOY_BTN5', 822, 805, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('pinky_trg', 'JOY_BTN6', 822, 599, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('c_stick_press', 'JOY_BTN4', 122, 696, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_1_up', 'JOY_BTN7', 822, 45, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_1_down', 'JOY_BTN9', 822, 185, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_1_left', 'JOY_BTN10', 722, 115, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_1_right', 'JOY_BTN8', 942, 115, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('stick_right_button', 'JOY_BTN3', 1072, 599, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_2_up', 'JOY_BTN11', 822, 335, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_2_down', 'JOY_BTN13', 822, 475, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_2_left', 'JOY_BTN14', 722, 405, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('hat_2_right', 'JOY_BTN12', 942, 405, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('pov_1_up', 'JOY_BTN_POV1_U', 122, 25, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('pov_1_down', 'JOY_BTN_POV1_D', 122, 165, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('pov_1_left', 'JOY_BTN_POV1_L', 22, 95, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('pov_1_right', 'JOY_BTN_POV1_R', 242, 95, SIZE_STANDARD_NORMAL, 'stick')
+        self.add_control('stick_top_button', 'JOY_BTN2', 482, 95, SIZE_STANDARD_NORMAL, 'stick')
+
+        # Switched
+        if switch_key:
+            self.add_control('index_s', 'JOY_BTN1', 122, 585, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('pinky_d_s', 'JOY_BTN5', 822, 875, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('pinky_trg_s', 'JOY_BTN6', 820, 669, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('c_stick_press_s', 'JOY_BTN4', 122, 766, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_1_up_s', 'JOY_BTN7', 1282, 45, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_1_down_s', 'JOY_BTN9', 1282, 185, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_1_left_s', 'JOY_BTN10', 1182, 115, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_1_right_s', 'JOY_BTN8', 1402, 115, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('stick_right_button_s', 'JOY_BTN3', 1072, 669, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_2_up_s', 'JOY_BTN11', 1282, 335, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_2_down_s', 'JOY_BTN13', 1282, 475, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_2_left_s', 'JOY_BTN14', 1182, 405, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('hat_2_right_s', 'JOY_BTN12', 1402, 405, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('pov_1_up_s', 'JOY_BTN_POV1_U', 122, 235, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('pov_1_down_s', 'JOY_BTN_POV1_D', 122, 375, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('pov_1_left_s', 'JOY_BTN_POV1_L', 22, 305, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('pov_1_right_s', 'JOY_BTN_POV1_R', 242, 305, SIZE_STANDARD_NORMAL, 'stick')
+            self.add_control('stick_top_button_s', 'JOY_BTN2', 482, 165, SIZE_STANDARD_NORMAL, 'stick')
+
+    def add_control(self, friendly_name, technical_name, x, y, size, location):
+        """
+        :param friendly_name:
+            e.g. 'Boat Switch FWD'
+        :param technical_name:
+            e.g. 'JOY_BTN9'
+        :param x:
+            e.g. 42
+        :param y:
+            e.g. 899
+        :param size:
+            e.g. SIZE_STANDARD_NORMAL
+        :param location:
+            e.g. 'throttle'
+        :return:
+            N/A
+        """
+        if friendly_name[-2:] != '_s':
+            self.control_mapping[technical_name] = friendly_name
+            self.position_mapping[technical_name] = (x, y, size, location)
+        else:
+            self.control_mapping[self.switch_key + technical_name] = friendly_name
+            self.switched_mapping[technical_name] = (x, y, size, location)
+
+    def add_switch(self, control):
+        if control not in self.control_mapping:
+            raise Exception("Unknown switch detected - {}".format(control))
+        self.switches.append(control)
+
+    def lookup_control(self, control):
+        if not control:
+            return None, None
+        try:
+            return self.control_mapping[control], False
+        except KeyError:
+            try:
+                return self.control_mapping[control], True
+            except KeyError:
+                return None, None
+
+    def lookup_position(self, control, switched):
+        if control not in self.position_mapping.keys() and not switched:
+            # this control doesn't actually exist
+            raise Exception("Control does not exist")
+        if switched:
+            return self.switched_mapping[control]
+        else:
+            return self.position_mapping[control]
+
+
+class X56Throttle:
+    def __init__(self, switch_key):
+        """
+                Mapping of buttons to actual buttons
+                K1_UP               JOY_BTN28
+                K1_DOWN             JOY_BTN29
+                throttle_b_4        JOY_BTN4
+                throttle_b_5        JOY_BTN5
+                tgl_4_up            JOY_BTN18
+                tgl_4_down          JOY_BTN19
+                tgl_3_up            JOY_BTN16
+                tgl_3_down          JOY_BTN17
+                tgl_2_up            JOY_BTN14
+                tgl_2_down          JOY_BTN15
+                tgl_1_up            JOY_BTN12
+                tgl_1_down          JOY_BTN13
+                rty_1               JOY_Z
+                rty_2               JOY_RZ
+                rty_3               JOY_SLIDER1
+                rty_4               JOY_SLIDER2
+                hat_3_up            JOY_BTN21
+                hat_3_down          JOY_BTN23
+                hat_3_left          JOY_BTN20
+                hat_3_right         JOY_BTN22
+                hat_4_up            JOY_BTN25
+                hat_4_down          JOY_BTN27
+                hat_4_left          JOY_BTN24
+                hat_4_right         JOY_BTN26
+                switch_1            JOY_BTN6
+                switch_2            JOY_BTN7
+                switch_3            JOY_BTN8
+                switch_4            JOY_BTN9
+                switch_5            JOY_BTN10
+                switch_6            JOY_BTN11
+                mode_1              ?
+                mode_2              ?
+                mode_3              ?
+                scroll_plus         JOY_BTN30
+                scroll_minus        JOY_BTN31
+                thumb_1             JOY_BTN33
+                thumb_2             JOY_BTN1
+        """
+        self.name = 'x56_throttle'
+        self.controller_type = 'hotas'
+        self.ignore_mapping = {
+            'JOY_Y',
+            'JOY_X',
+            'JOY_RY',
+            'JOY_RX',
+        }
+        self.switches = []
+        self.throttle_file = 'x56_throttle.png'
+        self.render_stick = False
+        self.render_throttle = True
+
+        self.switch_key = switch_key
+        self.control_mapping = {}
+        self.position_mapping = {}
+        self.switched_mapping = {}
+
+        self.add_control('k1_up', 'JOY_BTN28', 292, 15, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('k1_down', 'JOY_BTN29', 502, 15, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('throttle_b_4', 'JOY_BTN4', 517, 205, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('throttle_b_5', 'JOY_BTN5', 732, 15, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_4_up', 'JOY_BTN18', 1217, 865, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_4_down', 'JOY_BTN19', 1217, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_3_up', 'JOY_BTN16', 997, 865, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_3_down', 'JOY_BTN17', 997, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_2_up', 'JOY_BTN14', 777, 865, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_2_down', 'JOY_BTN15', 777, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_1_up', 'JOY_BTN12', 557, 865, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('toggle_1_down', 'JOY_BTN13', 557, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('rty_1', 'JOY_Z', 742, 285, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('rty_2', 'JOY_RZ', 1197, 265, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('rty_3', 'JOY_SLIDER1', 317, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('rty_4', 'JOY_SLIDER2', 97, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_3_up', 'JOY_BTN21', 1107, 405, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_3_down', 'JOY_BTN23', 1107, 545, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_3_left', 'JOY_BTN20', 1007, 475, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_3_right', 'JOY_BTN22', 1227, 475, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_4_up', 'JOY_BTN25', 1537, 715, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_4_down', 'JOY_BTN27', 1537, 855, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_4_left', 'JOY_BTN24', 1437, 785, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('hat_4_right', 'JOY_BTN26', 1657, 785, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('switch_1', 'JOY_BTN6', 257, 415, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('switch_2', 'JOY_BTN7', 257, 577, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('switch_3', 'JOY_BTN8', 17, 285, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('switch_4', 'JOY_BTN9', 17, 465, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('switch_5', 'JOY_BTN10', 17, 625, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('switch_6', 'JOY_BTN11', 17, 795, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('scroll_plus', 'JOY_BTN30', 292, 205, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('scroll_minus', 'JOY_BTN31', 292, 275, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('thumb_button_1', 'JOY_BTN33', 957, 15, SIZE_STANDARD_NORMAL, 'throttle')
+        self.add_control('thumb_button_2', 'JOY_BTN1', 977, 195, SIZE_STANDARD_NORMAL, 'throttle')
+
+        # Switched
+        if switch_key:
+            self.add_control('k1_up_s', 'JOY_BTN28', 292, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('k1_down_s', 'JOY_BTN29', 502, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('throttle_b_4_s', 'JOY_BTN4', 517, 275, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('throttle_b_5_s', 'JOY_BTN5', 732, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_4_up_s', 'JOY_BTN18', 1217, 935, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_4_down_s', 'JOY_BTN19', 1217, 1075, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_3_up_s', 'JOY_BTN16', 997, 935, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_3_down_s', 'JOY_BTN17', 997, 1075, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_2_up_s', 'JOY_BTN14', 777, 935, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_2_down_s', 'JOY_BTN15', 777, 1075, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_1_up_s', 'JOY_BTN12', 557, 935, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('toggle_1_down_s', 'JOY_BTN13', 557, 1075, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_3_up_s', 'JOY_BTN21', 1547, 405, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_3_down_s', 'JOY_BTN23', 1547, 545, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_3_left_s', 'JOY_BTN20', 1447, 475, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_3_right_s', 'JOY_BTN22', 1667, 475, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_4_up_s', 'JOY_BTN25', 1537, 935, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_4_down_s', 'JOY_BTN27', 1537, 1075, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_4_left_s', 'JOY_BTN24', 1437, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('hat_4_right_s', 'JOY_BTN26', 1657, 1005, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('switch_1_s', 'JOY_BTN6', 257, 485, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('switch_2_s', 'JOY_BTN7', 257, 647, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('switch_3_s', 'JOY_BTN8', 17, 355, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('switch_4_s', 'JOY_BTN9', 17, 535, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('switch_5_s', 'JOY_BTN10', 17, 695, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('switch_6_s', 'JOY_BTN11', 17, 865, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('thumb_button_1_s', 'JOY_BTN33', 957, 85, SIZE_STANDARD_NORMAL, 'throttle')
+            self.add_control('thumb_button_2_s', 'JOY_BTN1', 977, 265, SIZE_STANDARD_NORMAL, 'throttle')
 
     def add_control(self, friendly_name, technical_name, x, y, size, location):
         """
