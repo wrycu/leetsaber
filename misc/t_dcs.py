@@ -31,6 +31,9 @@ class Parser:
 
         for row in table.find_all('tr'):
             columns = row.find_all('td')
+            if not columns:
+                # table header doesn't use data; skip ahead
+                continue
             control_a = columns[0].text.replace('"', '').strip()
             # iterate over each bind for the control
             for control in control_a.split('; '):
@@ -128,7 +131,7 @@ class ControlMapper:
         soup = bs(controls, 'html.parser')
 
         try:
-            title = soup.find('title').next
+            title = soup.find('h1').next
         except Exception:
             raise Exception("Invalid/malformed file format")
 
