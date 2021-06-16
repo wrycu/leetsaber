@@ -161,16 +161,23 @@ def get_unit(unit, pretty_to_dcs):
         'AV8BNA': 'AV-8B',
         'Bf-109K-4': 'Bf-109',
         'CE2': 'Christen Eagle II',
+        'Christen Eagle II': 'Christen Eagle II',
         'C-101CC': 'C-101',
         'C-101EB': 'C-101',
         'F-5E-3': 'F-5',
         'F-5E': 'F-5',
         'F-14B': 'F-14',
+        'F-14A-135-GR': 'F-14',
         'F-16C bl.52d': 'F-16',
         'FA-18C_hornet': 'F/A-18C',
+        'F/A-18C': 'F/A-18C',
         'F-86F Sabre': 'F-86',
         'FW-190D9': 'FW-190',
+        'FW-190A8': 'FW-190',
         'SA342M': 'Gazelle',
+        'SA342Minigun': 'Gazelle',
+        'SA342Mistral': 'Gazelle',
+        'SA342L': 'Gazelle',
         'UH-1H': 'Huey',
         'Ka-50': 'Ka-50',
         'L-39ZA': 'L-39',
@@ -184,10 +191,26 @@ def get_unit(unit, pretty_to_dcs):
         'P-51D-30-NA': 'P-51',
         'P-51D': 'P-51',
         'SpitfireLFMkIX': 'Spitfire',
+        'SpitfireLFMkIXCW': 'Spitfire',
         'Yak-52': 'Yak-52',
         'Hawk': 'Hawk',
+        'T-45': 'Hawk',
         'JF-17': 'JF-17',
         'MiG-23MLD': 'Mig-23',
+        'F-16C_50': 'F-16',
+        'A-10C_2': 'A-10C',
+        'P-47D-30': 'P-47',
+        'P-47D-40': 'P-47',
+        'P-47D-30bl1': 'P-47',
+        'I-16': 'I-16',
+        'Mirage 2000-5': 'M-2000',
+        'MQ9_PREDATOR': 'CA',
+        # mod aircraft
+        'A-4E-C': 'A-4E',
+        'Hercules': 'C-130',
+        'C-130FR': 'C-130',
+        'AC_130': 'C-130',
+        'F-22A': 'F-22',
     }
     if pretty_to_dcs:
         return pretty_dcs[unit]
@@ -210,7 +233,7 @@ def add_modules(mission_data, the_table):
             decoded_aircraft = get_unit(aircraft, False)
             if decoded_aircraft not in module_list:
                 module_list[decoded_aircraft] = 0
-            module_list[decoded_aircraft] += a_data['count']
+            module_list[decoded_aircraft] += a_data
 
     for aircraft, count in module_list.items():
         data.append({

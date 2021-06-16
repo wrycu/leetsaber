@@ -1063,7 +1063,7 @@ class MissionParser:
     def find_missions(self):
         # get the number of pages
         reply = requests.get(
-            'https://www.digitalcombatsimulator.com/en/files/?PER_PAGE=100&PAGEN_1={}&set_filter=Filter&arrFilter_pf%5Bfiletype%5D=2&arrFilter_pf%5Bgameversion%5D=&arrFilter_pf%5Bfilelang%5D=&arrFilter_pf%5Baircraft%5D=&arrFilter_DATE_CREATE_1_DAYS_TO_BACK=&CREATED_BY=&sort_by_order=TIMESTAMP_X_DESC&LICENCE_FREE=yes'.format(
+            'https://www.digitalcombatsimulator.com/en/files/filter/type-is-multiplayer/localization-is-english/sort-is-date_desc/apply/?PAGEN_1={}&PER_PAGE=100'.format(
                 1,
             )
         )
@@ -1080,9 +1080,9 @@ class MissionParser:
         for x in range(1, num_pages + 1):
             print("Now downloading missions from page {}".format(x))
             reply = requests.get(
-                'https://www.digitalcombatsimulator.com/en/files/?PER_PAGE={}&PAGEN_1={}&set_filter=Filter&arrFilter_pf%5Bfiletype%5D=2&arrFilter_pf%5Bgameversion%5D=&arrFilter_pf%5Bfilelang%5D=&arrFilter_pf%5Baircraft%5D=&arrFilter_DATE_CREATE_1_DAYS_TO_BACK=&CREATED_BY=&sort_by_order=TIMESTAMP_X_DESC&LICENCE_FREE=yes'.format(
-                    page_size,
+                'https://www.digitalcombatsimulator.com/en/files/filter/type-is-multiplayer/localization-is-english/sort-is-date_desc/apply/?PAGEN_1={}&PER_PAGE={}'.format(
                     x,
+                    page_size,
                 )
             )
 
@@ -1132,8 +1132,70 @@ class MissionParser:
     def populate_modules(self):
         pass
 
-    def parse_mission(self, mission_name):
+    def __loaddict__(self, fname, mizfile, reserved_files):
+        reserved_files.append(fname)
+        with mizfile.open(fname) as mfile:
+            data = mfile.read()
+            data = data.decode()
+            import lua
+            return lua.loads(data)
+
+    def __load_assets__(self, filename: str):
+        import zipfile
+        with zipfile.ZipFile(filename, 'r') as miz:
+            reserved_files = []
+            try:
+                mission_dict = self.__loaddict__('mission', miz, reserved_files)
+            except SyntaxError:
+                return {}
+        return mission_dict
+
+    def get_file_metadata(self, filename: str):
+        # load assets
+        mission_dict = self.__load_assets__(filename)
+
+        if not mission_dict:
+            print(f"Bad mission: {filename}")
+            return None
+
+        units = {}
+        for col_name in ["blue", "red"]:
+            if col_name in mission_dict['mission']["coalition"]:
+                units[col_name] = {
+                    'aircraft': {},
+                    'slot_count': 0,
+                }
+                for x, country in mission_dict['mission']["coalition"][col_name]['country'].items():
+                    for category_name, category_data in country.items():
+                        if category_name not in ['helicopter', 'vehicle', 'plane']:
+                            continue
+                        for x, group in category_data['group'].items():
+                            for x, unit in group['units'].items():
+                                try:
+                                    skill_level = unit['skill']
+                                except KeyError:
+                                    skill_level = 'Average'
+                                if skill_level == 'Client':
+                                    if unit['type'] not in units[col_name]['aircraft']:
+                                        units[col_name]['aircraft'][unit['type']] = 0
+                                    units[col_name]['aircraft'][unit['type']] += 1
+                                    units[col_name]['slot_count'] += 1
+
+        start_time_day = int(mission_dict['mission']["start_time"] % 86400)
+        hour = int(start_time_day / 3600)
+        minutes = int(start_time_day / 60) - hour * 60
+
         data = {
+            'map': mission_dict['mission']['theatre'],
+            'time': "{:02d}:{:02d}".format(hour, minutes),
+            'format': mission_dict['mission']['version'],
+            'factions': units,
+        }
+
+        return data
+
+    def parse_mission(self, mission_name):
+        raw_data = {
             'factions': {
                 'blue': {
                     'slot_count': 0,
@@ -1151,8 +1213,18 @@ class MissionParser:
         }
         skip = []
         if str(mission_name) in skip:
-            return data
-        self.msn.load_file(str(mission_name))
+            return raw_data
+
+        try:
+            data = self.get_file_metadata(str(mission_name))
+            if not data:
+                return raw_data
+        except UnicodeDecodeError:
+            print(f"Unable to parse {mission_name}: unicode error")
+            return raw_data
+        data['meets_filter'] = False
+        return data
+
         data['map'] = self.msn.terrain.name
         data['format'] = self.msn.version
         data['time'] = self.msn.start_time.strftime('%H:%M')

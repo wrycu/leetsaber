@@ -69,6 +69,10 @@ def list_missions():
         matching_missions = []
         world_pilots, modules = config.GDRIVE.get_pilots()
         pilot_mapping = {}
+
+        num_pilots = len(request.json['pilot'])
+        slot_cap = num_pilots + int(request.json['cap'])
+
         for pilot in request.json['pilot']:
             modules = world_pilots[request.json['context']][pilot]
             pilot_mapping[pilot] = [x for x in modules if modules[x] == '1']
@@ -86,8 +90,6 @@ def list_missions():
             )
         ).execute().fetchall()
 
-        mission_count = len(results)
-
         for result in results:
             if result.mission_id not in missions:
                 missions[result.mission_id] = {}
@@ -95,6 +97,7 @@ def list_missions():
                 missions[result.mission_id][result.name] = 0
             missions[result.mission_id][result.name] = result.module_count
 
+        mission_count = len(missions)
         print(missions)
         matched = []
 
@@ -151,6 +154,8 @@ def list_missions():
                 for plane in raw_planes:
                     details['factions']['blue']['aircraft'][plane.name] = plane.module_count
                     details['total_slots'] += plane.module_count
+                if details['total_slots'] > slot_cap:
+                    continue
                 matched_details.append(details)
         matched_details = sorted(matched_details, key=lambda k: k['total_slots'])
         return Response(
@@ -161,6 +166,7 @@ def list_missions():
                     players=pilot_mapping,
                     mission_count=mission_count,
                     match_count=len(matched),
+                    match_count_filtered=len(matched_details,)
                 )
             }),
             mimetype='application/json'

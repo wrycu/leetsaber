@@ -71,6 +71,22 @@
     </div>
     <div class="row">
         <div class="one wide column"></div>
+        <div class="three wide column">
+            <div>
+                <div class="ui fluid labeled input">
+                    <div class="ui label">
+                        Cap at
+                    </div>
+                    <input type="number" min="0" id="max_count" value="5">
+                    <div class="ui label">
+                        slots above pilot count
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="one wide column"></div>
         <div class="five wide column">
             <!--
             We have two dropdowns here because of a semantic UI bug where modifying the value of the dropdown
@@ -131,6 +147,7 @@
         $('#pilot_search').click(function(){
             var pilots = $('#p_grouping_st_pilots').dropdown('get value');
             var context = 'st';
+            var cap = $('#max_count').val();
             if (pilots === null) {
                 // we failed to get data - assume we need to hit up the other dropdown
                 var pilots = $('#p_grouping_leetsaber_pilots').dropdown('get value');
@@ -142,6 +159,7 @@
                 data: JSON.stringify({
                     'pilot': pilots,
                     'context': context,
+                    'cap': cap,
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
