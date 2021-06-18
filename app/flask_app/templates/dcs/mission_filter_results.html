@@ -40,6 +40,7 @@
             <tr>
                 <td class="two wide">
                     {{ details['name'] }}
+                    <a href="{{ url_for("dcs.get_mission", mission_id=details['id']) }}"><i class="download icon"></i></a>
                 </td>
                 <td class="two wide">
                     {{ details['terrain'] }}

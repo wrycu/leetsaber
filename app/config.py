@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Table
 from configparser import ConfigParser
+from urllib.parse import quote_plus as url_quote
 import os
 from misc.t_dcs import ControlMapper
 from misc.gdrive import GDrive
@@ -51,17 +52,17 @@ conf = {
 engine = create_engine(
     'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'.format(
         user=conf['mysql']['user'],
-        password=conf['mysql']['pass'],
+        password=url_quote(conf['mysql']['pass']),
         host=conf['mysql']['host'],
         port=conf['mysql']['port'],
         db=conf['mysql']['stats']['db'],
     )
 )
 
-STATS_DB_META = MetaData(bind=engine, reflect=True)
-DISCORD_USER_TABLE = STATS_DB_META.tables['users']
-STATS_GAMES_TABLE = STATS_DB_META.tables['games']
-STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
+STATS_DB_META = MetaData(bind=engine)
+DISCORD_USER_TABLE = Table('users', STATS_DB_META, autoload_with=engine)
+STATS_GAMES_TABLE = Table('games', STATS_DB_META, autoload_with=engine)
+STATS_STATS_TABLE = Table('statistics', STATS_DB_META, autoload_with=engine)
 
 #armada_engine = create_engine(
 #    'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'.format(
@@ -76,17 +77,17 @@ STATS_STATS_TABLE = STATS_DB_META.tables['statistics']
 dcs_engine = create_engine(
     'mysql+pymysql://{user}:{password}@{host}:{port}/{db}'.format(
         user=conf['mysql']['dcs']['user'],
-        password=conf['mysql']['dcs']['pass'],
+        password=url_quote(conf['mysql']['dcs']['pass']),
         host=conf['mysql']['dcs']['host'],
         port=conf['mysql']['dcs']['port'],
         db=conf['mysql']['dcs']['db'],
     )
 )
 
-DCS_DB_META = MetaData(bind=dcs_engine, reflect=True)
-DCS_MISSION_TABLE = DCS_DB_META.tables['missions']
-DCS_MODULE_TABLE = DCS_DB_META.tables['modules']
-DCS_M_M_TABLE = DCS_DB_META.tables['mission_module_count']
+DCS_DB_META = MetaData(bind=dcs_engine)
+DCS_MISSION_TABLE = Table('missions', DCS_DB_META, autoload_with=dcs_engine)
+DCS_MODULE_TABLE = Table('modules', DCS_DB_META, autoload_with=dcs_engine)
+DCS_M_M_TABLE = Table('mission_module_count', DCS_DB_META, autoload_with=dcs_engine)
 
 
 #ARMADA_DB_META = MetaData(bind=armada_engine, reflect=True)
