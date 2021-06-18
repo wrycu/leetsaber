@@ -1,8 +1,9 @@
+import flask
 from flask import Blueprint, render_template, request, Response
 import json
 from sqlalchemy import select
-import dcs as pydcs
-from misc.t_dcs import MissionParser, MissionSearcher
+import os
+from misc.t_dcs import MissionSearcher
 from app import config
 
 dcs = Blueprint(
@@ -15,7 +16,6 @@ dcs = Blueprint(
 def landing():
     return render_template(
         'dcs/base.html',
-        body='',
     )
 
 
@@ -171,3 +171,25 @@ def list_missions():
             }),
             mimetype='application/json'
         )
+
+
+@dcs.route('/missions/<int:mission_id>', methods=['GET'])
+def get_mission(mission_id):
+    results = select([
+        config.DCS_MISSION_TABLE.c.path,
+    ]).where(
+        config.DCS_MISSION_TABLE.c.id == mission_id
+    ).execute().fetchall()
+
+    if not results:
+        return Response(
+            'Failed to find mission',
+            400
+        )
+    path = str(results[0][0])
+    name = os.path.split(path)[1]
+    return flask.send_file(
+        path,
+        download_name=name,
+    )
+
