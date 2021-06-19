@@ -1117,7 +1117,10 @@ class MissionParser:
             )
             reply.raise_for_status()
             open(
-                '{}\\{}'.format(self.save_dir, file_name),
+                os.path.join(
+                    self.save_dir,
+                    file_name
+                ),
                 'wb'
             ).write(
                 reply.content
@@ -1329,12 +1332,12 @@ if __name__ == '__main__':
     last_downloaded = config.get('dcs', 'last_downloaded')
     if last_downloaded != 0:
         m_parse = MissionParser(
-            config.get('dcs', 'mission_path3'),
+            config.get('dcs', 'mission_path'),
             last_downloaded,
         )
     else:
         m_parse = MissionParser(
-            config.get('dcs', 'mission_path3'),
+            config.get('dcs', 'mission_path'),
         )
     last_downloaded = m_parse.find_missions()
     if last_downloaded:
