@@ -1,7 +1,7 @@
 import configparser
 from t_dcs import MissionParser
 from gdrive import GDrive
-from sqlalchemy import create_engine, MetaData, select
+from sqlalchemy import create_engine, MetaData, select, Table
 import hashlib
 import os
 
@@ -274,11 +274,12 @@ if __name__ == '__main__':
         )
     )
 
-    dcs_meta = MetaData(bind=engine, reflect=True)
+    dcs_meta = MetaData(bind=engine)
 
-    mission_table = dcs_meta.tables['missions']
-    module_table = dcs_meta.tables['modules']
-    m_m_join_table = dcs_meta.tables['mission_module_count']
+    mission_table = Table('missions', dcs_meta, autoload_with=engine)
+    module_table = Table('modules', dcs_meta, autoload_with=engine)
+    m_m_join_table = Table('mission_module_count', dcs_meta, autoload_with=engine)
+
     # select the existing missions so we can determine if each mission is new or not
     results = select([
         mission_table.c.name,
