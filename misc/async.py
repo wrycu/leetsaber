@@ -356,6 +356,6 @@ if __name__ == '__main__':
                 'format': m_data['format'],
                 'digest': m_digest,
                 'path': str(mission),
-            }).execute().inserted_primary_key
+            }).execute().inserted_primary_key[0]
             existing_missions[m_name] = m_digest
         add_modules(m_data, m_m_join_table)
