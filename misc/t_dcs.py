@@ -1087,6 +1087,8 @@ class MissionParser:
             reply.raise_for_status()
             try:
                 last_downloaded_id = self.download_missions(reply.text)
+            except MemoryError:
+                pass
             except Exception as e:
                 print("Exception:", e)
                 break
