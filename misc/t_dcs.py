@@ -5,7 +5,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import io
 import base64
-import dcs as pydcs
 from pathlib import Path
 import glob
 SIZE_LARGE = 45
@@ -1049,7 +1048,6 @@ class X56Throttle:
 
 class MissionParser:
     def __init__(self, save_dir=None, last_download_id=None):
-        self.msn = pydcs.Mission()
         self.download_base = 'https://www.digitalcombatsimulator.com'
         if save_dir:
             self.save_dir = save_dir
@@ -1226,35 +1224,6 @@ class MissionParser:
             print(f"Unable to parse {mission_name}: unicode error")
             return raw_data
         data['meets_filter'] = False
-        return data
-
-        data['map'] = self.msn.terrain.name
-        data['format'] = self.msn.version
-        data['time'] = self.msn.start_time.strftime('%H:%M')
-        for country in self.msn.coalition['blue'].countries:
-            for plane_group in self.msn.coalition['blue'].country(country).plane_group:
-                for plane in plane_group.units:
-                    if not plane.is_human():
-                        continue
-                    if plane.type not in data['factions']['blue']['aircraft']:
-                        data['factions']['blue']['aircraft'][plane.type] = {
-                            'start_type': 'unknown',
-                            'count': 0,
-                        }
-                    data['factions']['blue']['aircraft'][plane.type]['count'] += 1
-                    data['factions']['blue']['slot_count'] += 1
-        for country in self.msn.coalition['red'].countries:
-            for plane_group in self.msn.coalition['red'].country(country).plane_group:
-                for plane in plane_group.units:
-                    if not plane.is_human():
-                        continue
-                    if plane.type not in data['factions']['red']['aircraft']:
-                        data['factions']['red']['aircraft'][plane.type] = {
-                            'start_type': 'unknown',
-                            'count': 0,
-                        }
-                    data['factions']['red']['aircraft'][plane.type]['count'] += 1
-                    data['factions']['red']['slot_count'] += 1
         return data
 
 
