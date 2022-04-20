@@ -42,6 +42,7 @@ class GDrive:
                     }
 
                     reply = requests.post('https://www.googleapis.com/oauth2/v3/token', data=data)
+                    print(reply.json())
                     self.access_token = reply.json()['access_token']
                     print(self.access_token)
                     reply = self._make_request_(method, endpoint, data, query_params)

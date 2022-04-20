@@ -2,24 +2,8 @@
     <div class="one wide column"></div>
         <div class="ui message">
             <div class="header">
-                Found <font color=green>{{ match_count }}</font> matching missions out of a total of <font color=green>{{ mission_count }}</font>, filtered to <font color=green>{{ match_count_filtered }}</font> based on max slot count | Considering the following pilots:
+                Found <font color=green>{{ match_count }}</font> missions with the requested modules, out of a total of <font color=green>{{ mission_count }}</font>. Filtered to <font color=green>{{ match_count_filtered }}</font> based on max slot count.
             </div>
-            <p>
-                <table class="ui very basic table">
-                    {% for player in players %}
-                        <tr>
-                            <td>
-                                {{ player }}
-                            </td>
-                            <td>
-                                {% for plane in players[player] %}
-                                    {{ plane }}&nbsp;
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </p>
         </div>
     </div>
 </div>
@@ -39,8 +23,7 @@
         {% for details in missions %}
             <tr>
                 <td class="two wide">
-                    {{ details['name'] }}
-                    <a href="{{ url_for("dcs.get_mission", mission_id=details['id']) }}"><i class="download icon"></i></a>
+                    <a href="https://www.digitalcombatsimulator.com/en/files/{{ details['ed_id'] }}">{{ details['name'] }}</a>
                 </td>
                 <td class="two wide">
                     {{ details['terrain'] }}
@@ -77,6 +60,6 @@
     <div class="header">
     Uh oh!
     </div>
-    <p>Couldn't find any matches for those pilots :|</p>
+    <p>Couldn't find any matches for your query :|</p>
 </div>
 {% endif %}

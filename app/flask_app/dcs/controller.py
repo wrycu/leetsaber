@@ -1,7 +1,7 @@
 import flask
 from flask import Blueprint, render_template, request, Response
 import json
-from sqlalchemy import select
+from sqlalchemy import select, and_
 import os
 from misc.t_dcs import MissionSearcher
 from app import config
@@ -56,70 +56,48 @@ def upload():
 @dcs.route('/missions', methods=['GET', 'POST'])
 def list_missions():
     if request.method == 'GET':
-        pilots, modules = config.GDRIVE.get_pilots()
-        print(pilots)
+        modules = select([
+            config.DCS_MODULE_TABLE.c.id,
+            config.DCS_MODULE_TABLE.c.name,
+        ]).order_by(
+            config.DCS_MODULE_TABLE.c.name,
+        ).execute().fetchall()
+
         return render_template(
-            'dcs/mission_filter.html',
-            pilots=pilots,
+            'dcs/mission.html',
             modules=modules,
         )
     else:
-        # build a list of modules that the POSTed pilots own so we can query for missions
-        # build a pilot --> modules mapping
-        matching_missions = []
-        world_pilots, modules = config.GDRIVE.get_pilots()
+        # find matching missions
         pilot_mapping = {}
 
-        num_pilots = len(request.json['pilot'])
-        slot_cap = num_pilots + int(request.json['cap'])
+        desired_modules = request.json['modules']
+        desired_count = [int(x) for x in request.json['counts']]
+        desired_cap = sum(desired_count) + int(request.json['cap'])
 
-        for pilot in request.json['pilot']:
-            modules = world_pilots[request.json['context']][pilot]
-            pilot_mapping[pilot] = [x for x in modules if modules[x] == '1']
+        # build the where statement
+        for x, module in enumerate(desired_modules):
+            pilot_mapping[int(module)] = desired_count[x]
+        print(pilot_mapping)
+
         # ok, now build a list of slots available in the mission
-        missions = {}
-
         results = select([
-            config.DCS_M_M_TABLE.c.module_count,
-            config.DCS_M_M_TABLE.c.mission_id,
-            config.DCS_MODULE_TABLE.c.name,
-        ]).select_from(
-            config.DCS_M_M_TABLE.join(
-                config.DCS_MODULE_TABLE,
-                config.DCS_MODULE_TABLE.c.id == config.DCS_M_M_TABLE.c.module_id
-            )
-        ).execute().fetchall()
+            config.DCS_MISSION_TABLE.c.id,
+        ]).execute().fetchall()
 
-        for result in results:
-            if result.mission_id not in missions:
-                missions[result.mission_id] = {}
-            if result.name not in missions[result.mission_id]:
-                missions[result.mission_id][result.name] = 0
-            missions[result.mission_id][result.name] = result.module_count
-
-        mission_count = len(missions)
-        print(missions)
-        matched = []
-
-        for m_id, mission in missions.items():
-            m = MissionSearcher(
-                pilot_mapping,
-                mission
-            )
-            if m.solve(m.state):
-                print("solved for {} - {}".format(m_id, m.state))
-                matched.append(m_id)
-            else:
-                print("Couldn't find matching for {} - slots - {}".format(m_id, mission))
+        missions = [x.id for x in results]
+        # how many missions have the _slots_ we desire
+        match_count = 0
 
         matched_details = []
         # select details for matched missions
-        for mission in matched:
+        for mission in missions:
             results = select([
                 config.DCS_MISSION_TABLE.c.id,
                 config.DCS_MISSION_TABLE.c.name.label('mission_name'),
                 config.DCS_MISSION_TABLE.c.map,
                 config.DCS_MISSION_TABLE.c.start_time,
+                config.DCS_MISSION_TABLE.c.ed_id,
             ]).where(
                 config.DCS_MISSION_TABLE.c.id == mission
             ).execute().fetchall()
@@ -138,9 +116,11 @@ def list_missions():
                     'total_slots': 0,
                     'id': result.id,
                     'name': result.mission_name,
+                    'ed_id': result.ed_id,
                 }
                 # get aircraft in the mission
                 raw_planes = select([
+                    config.DCS_MODULE_TABLE.c.id,
                     config.DCS_MODULE_TABLE.c.name,
                     config.DCS_M_M_TABLE.c.module_count,
                 ]).select_from(
@@ -151,45 +131,45 @@ def list_missions():
                 ).where(
                     config.DCS_M_M_TABLE.c.mission_id == mission
                 ).execute().fetchall()
+
+                met_criteria = None
+
+                parsed_planes = {}
+                for plane in raw_planes:
+                    parsed_planes[plane.id] = {
+                        'name': plane.name,
+                        'count': plane.module_count,
+                    }
+
+                for module, desired_module_count in pilot_mapping.items():
+                    # check if it's in the mission, if it has the count, AND if we haven't already failed to meet these criteria
+                    if module in parsed_planes.keys() and parsed_planes[module]['count'] >= desired_module_count:
+                        if met_criteria is None:
+                            # avoid setting it to true if we've already set it to false
+                            met_criteria = True
+                    else:
+                        met_criteria = False
+                if met_criteria:
+                    match_count += 1
                 for plane in raw_planes:
                     details['factions']['blue']['aircraft'][plane.name] = plane.module_count
                     details['total_slots'] += plane.module_count
-                if details['total_slots'] > slot_cap:
+                if details['total_slots'] > desired_cap or not met_criteria:
                     continue
                 matched_details.append(details)
         matched_details = sorted(matched_details, key=lambda k: k['total_slots'])
+        mission_count = len(select([config.DCS_MISSION_TABLE.c.id]).execute().fetchall())
+        print("found a total of {} missions".format(len(matched_details)))
+
         return Response(
             json.dumps({
                 'status': render_template(
                     'dcs/mission_filter_results.html',
                     missions=matched_details,
-                    players=pilot_mapping,
                     mission_count=mission_count,
-                    match_count=len(matched),
-                    match_count_filtered=len(matched_details,)
+                    match_count=match_count,
+                    match_count_filtered=len(matched_details),
                 )
             }),
             mimetype='application/json'
         )
-
-
-@dcs.route('/missions/<int:mission_id>', methods=['GET'])
-def get_mission(mission_id):
-    results = select([
-        config.DCS_MISSION_TABLE.c.path,
-    ]).where(
-        config.DCS_MISSION_TABLE.c.id == mission_id
-    ).execute().fetchall()
-
-    if not results:
-        return Response(
-            'Failed to find mission',
-            400
-        )
-    path = str(results[0][0])
-    name = os.path.split(path)[1]
-    return flask.send_file(
-        path,
-        download_name=name,
-    )
-

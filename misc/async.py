@@ -60,6 +60,9 @@ def get_unit(unit, pretty_to_dcs):
         'A-10C': [
             'A-10C',
         ],
+        'A-10C_2': [
+            'A-10C II',
+        ],
         'AJS37': [
             'AJS37',
         ],
@@ -143,6 +146,37 @@ def get_unit(unit, pretty_to_dcs):
         'Mig-23': [
             'MiG-23MLD',
         ],
+        'Mi-24P': [
+            'Mi-24P',
+        ],
+        'AH-64D': [
+            'AH-64D_BLK_II',
+        ],
+        'P-47': [
+            'P-47D-30',
+            'P-47D-40',
+            'P-47D-30bl1',
+        ],
+        'Mosquito': [
+            'MosquitoFBMkVI',
+        ],
+        'A-4E': [
+            'A-4E-C',
+        ],
+        'C-130': [
+            'Hercules',
+            'C-130FR',
+            'AC_130',
+        ],
+        'F-22': [
+            'F-22A',
+        ],
+        'UH-60': [
+            'UH-60L',
+        ],
+        'F-15E': [
+            'F-15E',
+        ],
     }
     dcs_pretty = {
         'A-10A': 'FC-3 or 4',  # all FC3 modules map to FC3
@@ -198,19 +232,25 @@ def get_unit(unit, pretty_to_dcs):
         'JF-17': 'JF-17',
         'MiG-23MLD': 'Mig-23',
         'F-16C_50': 'F-16',
-        'A-10C_2': 'A-10C',
+        'A-10C_2': 'A-10C II',
+        'A-10C II': 'A-10C II',
         'P-47D-30': 'P-47',
         'P-47D-40': 'P-47',
         'P-47D-30bl1': 'P-47',
         'I-16': 'I-16',
         'Mirage 2000-5': 'M-2000',
         'MQ9_PREDATOR': 'CA',
+        'Mi-24P': 'Mi-24P',
+        'AH-64D_BLK_II': 'AH-64D',
+        'MosquitoFBMkVI': 'Mosquito',
         # mod aircraft
         'A-4E-C': 'A-4E',
         'Hercules': 'C-130',
         'C-130FR': 'C-130',
         'AC_130': 'C-130',
         'F-22A': 'F-22',
+        'UH-60L': 'UH-60',
+        'F-15E': 'F-15E',
     }
     if pretty_to_dcs:
         return pretty_dcs[unit]
