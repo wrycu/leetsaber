@@ -14,8 +14,8 @@
     <thead>
         <tr>
             <th>Mission</th>
-            <th>Map</th>
             <th>Start Time</th>
+            <th>Map</th>
             <th>Units</th>
         </tr>
     </thead>
@@ -23,13 +23,14 @@
         {% for details in missions %}
             <tr>
                 <td class="two wide">
-                    <a href="https://www.digitalcombatsimulator.com/en/files/{{ details['ed_id'] }}">{{ details['name'] }}</a>
-                </td>
-                <td class="two wide">
-                    {{ details['terrain'] }}
+                    <a href="https://www.digitalcombatsimulator.com/en/files/{{ details['ed_id'] }}">{{ details['name'] }}</a><br>
+                    Uploaded {{ details['ed_date'] }}
                 </td>
                 <td class="one wide">
                     {{ details['time'] }}
+                </td>
+                <td class="two wide">
+                    {{ details['terrain'] }}
                 </td>
                 <td>
                     <table class="ui very basic collapsing celled table">

@@ -98,6 +98,7 @@ def list_missions():
                 config.DCS_MISSION_TABLE.c.map,
                 config.DCS_MISSION_TABLE.c.start_time,
                 config.DCS_MISSION_TABLE.c.ed_id,
+                config.DCS_MISSION_TABLE.c.ed_upload_date,
             ]).where(
                 config.DCS_MISSION_TABLE.c.id == mission
             ).execute().fetchall()
@@ -117,6 +118,7 @@ def list_missions():
                     'id': result.id,
                     'name': result.mission_name,
                     'ed_id': result.ed_id,
+                    'ed_date': result.ed_upload_date,
                 }
                 # get aircraft in the mission
                 raw_planes = select([
