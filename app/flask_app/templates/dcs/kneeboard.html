@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block body %}
+<script>
+    function save_pic() {
+        var link = document.createElement("a");
+        link.setAttribute("href", $('#data').attr('data'));
+        link.setAttribute("download", 'test.miz');
+        link.click();
+    }
+    function upload(data) {
+        $.ajax({
+            url: "{{ url_for('dcs.kneeboard') }}",
+            type: 'POST',
+            data: data,
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,  // tell jQuery not to set contentType
+            dataType: 'binary',
+            cache: false,
+            success: function(res, status, xhr) {
+                let filename = xhr.getResponseHeader('Content-Disposition').split('=')[1];
+                let blob = new Blob([res], {type: 'application/octetstream'});
+                let a = document.createElement('a');
+                a.href = window.URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(a.href);
+            },
+            error: function(xhr, text, error) {
+              console.log(error)
+                $("#error_content").text(xhr.responseText);
+                $('.ui.modal').modal('show');
+            },
+        });
+    }
+
+    function dropHandler(ev) {
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+
+        if (ev.dataTransfer.items) {
+            var file = ev.dataTransfer.files;
+            var fd = new FormData();
+            fd.append('msn', file[0]);
+            // we only support two files. if they drag more, tough.
+            if (file.length > 1)
+                fd.append('controls2', file[1]);
+            upload(fd);
+        }
+    }
+
+    function dragOverHandler(ev) {
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+    }
+</script>
+<div class="ui grid">
+    <div class="centered row">
+        <div class="ui center aligned basic segment">
+            <div class="ui blue inverted segment" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+                Drag and drop
+                <i class="upload icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="five wide column"></div>
+        <div class="three wide column">
+            <div id="data"></div>
+        </div>
+        <div class="three wide column">
+            <div id="throttle"></div>
+        </div>
+        <div class="five wide column">
+            <a id="stick_save">
+                <i class="save icon"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="error" class="ui modal">
+    <div class="header">Error</div>
+    <div id="error_content" class="content"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+      // set up jquery to handle binary data
+        /**
+         *
+         * jquery.binarytransport.js
+         *
+         * @description. jQuery ajax transport for making binary data type requests.
+         * @version 1.0
+         * @author Henry Algus <henryalgus@gmail.com>
+         *
+         */
+
+        // use this transport for "binary" data type
+        $.ajaxTransport("+binary", function (options, originalOptions, jqXHR) {
+            // check for conditions and support for blob / arraybuffer response type
+            if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob))))) {
+                return {
+                    // create new XMLHttpRequest
+                    send: function (headers, callback) {
+                        // setup all variables
+                        var xhr = new XMLHttpRequest(),
+                            url = options.url,
+                            type = options.type,
+                            async = options.async || true,
+                            // blob or arraybuffer. Default is blob
+                            dataType = options.responseType || "blob",
+                            data = options.data || null,
+                            username = options.username || null,
+                            password = options.password || null;
+
+                        xhr.addEventListener('load', function () {
+                            var data = {};
+                            data[options.dataType] = xhr.response;
+                            // make callback and send data
+                            callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
+                        });
+
+                        xhr.open(type, url, async, username, password);
+
+                        // setup custom headers
+                        for (var i in headers) {
+                            xhr.setRequestHeader(i, headers[i]);
+                        }
+
+                        xhr.responseType = dataType;
+                        xhr.send(data);
+                    },
+                    abort: function () {
+                        jqXHR.abort();
+                    }
+                };
+            }
+        });
+        $("#controls").change(function(){
+            var formData = new FormData($("#myform")[0]);
+            upload(formData);
+        });
+    });
+</script>
+{% endblock %}
