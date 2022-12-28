@@ -1,9 +1,15 @@
+import datetime
+
 import flask
-from flask import Blueprint, render_template, request, Response
+from flask import Blueprint, render_template, request, Response, send_file, make_response
 import json
 from sqlalchemy import select, and_
+import arrow
 import os
 from misc.t_dcs import MissionSearcher
+import zipfile
+import io
+from pathlib import Path
 from app import config
 
 dcs = Blueprint(
@@ -175,3 +181,110 @@ def list_missions():
             }),
             mimetype='application/json'
         )
+
+
+@dcs.route('/stats', methods=['GET'])
+def mission_stats():
+
+    missions = select([
+        config.DCS_MISSION_TABLE.c.ed_upload_date,
+    ]).order_by(
+        config.DCS_MISSION_TABLE.c.ed_upload_date,
+    ).execute().fetchall()
+
+    last_upload = arrow.now().floor('month')
+    missions_uploaded = {}
+    cumulative_upload = {}
+
+    sorted_data = {
+        'dates': [],
+        'total': [],
+        'by_month': [],
+    }
+
+    # populate data
+    total = 0
+    for row in missions:
+        total += 1
+        current_upload = str(arrow.get(row[0]).floor('month').year)
+        if current_upload not in missions_uploaded:
+            missions_uploaded[current_upload] = 0
+        missions_uploaded[current_upload] += 1
+        cumulative_upload[current_upload] = total
+
+    current_upload = arrow.get(missions[0][0]).floor('month')
+    # backfill months while iterating over every month
+    x = 0
+    while current_upload < last_upload:
+        # add the date to our known dates
+        sorted_data['dates'].append(
+            str(current_upload.year)
+        )
+        # check if the date is known and add the individual point if it is
+        if str(current_upload.year) not in missions_uploaded:
+            sorted_data['by_month'].append(
+                0
+            )
+            # we also have cumulative data for this date
+            sorted_data['total'].append(
+                sorted_data['total'][x - 1]
+            )
+        else:
+            sorted_data['by_month'].append(
+                missions_uploaded[str(current_upload.year)]
+            )
+            # we don't have cumulative data for this date, pick it from the previous date
+            sorted_data['total'].append(
+                cumulative_upload[str(current_upload.year)]
+            )
+        x += 1
+        current_upload = current_upload.shift(years=1)
+
+    return render_template(
+        'dcs/mission_stats.html',
+        uploaded=missions_uploaded,
+        cumulative=cumulative_upload,
+        sorted_data=sorted_data,
+    )
+
+
+@dcs.route('/kneeboard', methods=['GET', 'POST'])
+def kneeboard():
+    if request.method == 'GET':
+        return render_template(
+            'dcs/kneeboard.html',
+        )
+    elif request.method == 'POST':
+        pages = [
+            Path('C:\\Users\\Tim\\Pictures\\st_logo_transparent_yt_style.0.png'),
+        ]
+        try:
+            in_memory_zip = io.BytesIO()
+            data = io.BytesIO(request.files['msn'].getvalue())
+            in_len = data.getbuffer().nbytes
+
+            with zipfile.ZipFile(in_memory_zip, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+                for file_name, contents in extract_zip(data).items():
+                    zf.writestr(file_name, contents)
+                for page in pages:
+                    zf.write(page, 'KNEEBOARD\\F-14B\\IMAGES\\1.png')
+
+            in_memory_zip.seek(0)
+            out_len = in_memory_zip.getbuffer().nbytes
+            extract_zip(in_memory_zip)
+            in_memory_zip.seek(0)
+            print(f"IN: {in_len} OUT: {out_len}")
+            return send_file(in_memory_zip, attachment_filename=request.files['msn'].filename, as_attachment=True)
+        except Exception as e:
+            return Response(
+                str(e),
+                500
+            )
+
+
+def extract_zip(contents):
+    input_zip = zipfile.ZipFile(contents, 'r')
+    contents = {}
+    for file in input_zip.namelist():
+        contents[file] = input_zip.read(file)
+    return contents

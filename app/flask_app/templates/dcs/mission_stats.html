@@ -1,0 +1,85 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Discord Stat Tracking 2.0</title>
+</head>
+<body>
+<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="{{ url_for('static', filename='js/semantic.min.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/semantic.min.css') }}">
+
+<div id="uploaded"></div>
+
+<script>
+$(function () {
+    Highcharts.chart('uploaded', {
+        chart: {
+            zoomType: 'x'
+        },
+        title: {
+            text: 'MP Missions Uploaded Over Time'
+        },
+        subtitle: {
+            text: 'Source: ED User Files'
+        },
+        yAxis: {
+            title: {
+                text: 'Mission Count'
+            }
+        },
+        xAxis: {
+            categories: [
+                {% for date in sorted_data['dates'] %}
+                    '{{ date }}',
+                {% endfor %}
+            ],
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                //data: [],
+            }
+        },
+        series: [{
+            name: 'Total',
+            data: [
+                {% for upload in sorted_data['by_month'] %}
+                    {{ upload }},
+                {% endfor %}
+            ]
+        }, {
+            name: 'Cumulative',
+            data: [
+                {% for upload in sorted_data['total'] %}
+                    {{ upload }},
+                {% endfor %}
+            ]
+        }],
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
+});
+</script>
+</body>
+</html>
